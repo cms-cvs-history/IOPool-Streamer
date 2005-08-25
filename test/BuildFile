@@ -4,6 +4,7 @@
   <use name=IOPool/OutputService>
   <use name=IOPool/InputService>
   <use name=FWCore/Framework>
+  <use name=FWCore/Integration>
 
   <bin file=EventBuffer_t.cpp> </bin>
 
