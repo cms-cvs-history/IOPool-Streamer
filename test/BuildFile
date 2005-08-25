@@ -1,16 +1,20 @@
 <environment>
   <use name=boost>
   <use name=IOPool/Streamer>
+  <use name=IOPool/OutputService>
+  <use name=IOPool/InputService>
   <use name=FWCore/Framework>
 
   <bin file=EventBuffer_t.cpp> </bin>
 
   <library file="StreamThingProducer.cc" name=StreamThingProducer>
    <flags SEAL_PLUGIN_NAME="StreamThingProducer">
+  <use name=IOPool/Streamer>
   </library>
 
   <library file="StreamThingAnalyzer.cc" name=StreamThingAnalyzer>
    <flags SEAL_PLUGIN_NAME="StreamThingAnalyzer">
+  <use name=IOPool/Streamer>
   </library>
 
 </environment>
