@@ -1,0 +1,25 @@
+
+process TEST = {
+
+        source = PoolInputService
+        {
+                untracked string fileName = 'myout.root'
+                untracked int32 maxEvents = -1
+        }
+
+        module out = StreamTestConsumer
+        {
+          int32 max_event_size = 2000000
+          int32 max_queue_depth = 5
+
+          PSet consumer_config = 
+          {
+                string fileName = "myout_copy.dat"
+          }
+        }
+
+        path p = { out }
+
+
+}
+
