@@ -6,7 +6,11 @@
   <use name=FWCore/Framework>
   <use name=FWCore/Integration>
 
-  <bin file=EventBuffer_t.cpp> </bin>
+  <bin file=EventBuffer_t.cpp>
+     <flags TEST_RUNNER_ARGS=" 10 10 100 ">
+  </bin>
+
+ 
 
   <library file="StreamThingProducer.cc" name=StreamThingProducer>
    <flags SEAL_PLUGIN_NAME="StreamThingProducer">
