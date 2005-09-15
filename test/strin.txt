@@ -1,0 +1,20 @@
+
+process PROD = {
+
+        source = StreamTestProducer { 
+           PSet producer_config =
+           {
+              string fileName = "myout.dat"
+           }
+
+          int32 max_event_size = 2000000
+          int32 max_queue_depth = 5
+        }
+
+        module out = PoolOutputModule {
+               untracked string fileName = 'MidpointJets_s.root'
+        }
+
+        path p = { out }
+}
+
