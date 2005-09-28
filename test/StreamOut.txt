@@ -1,7 +1,7 @@
 
 process PROD  =
 {
-	source = EmptyInputService
+	source = EmptySource
 	{
 	  untracked int32 maxEvents = 20
 	}

@@ -12,6 +12,6 @@ process TEST = {
 		untracked string fileName = 'RefTest.root'
 	}
 
-	source = EmptyInputService {untracked int32 maxEvents = 20}
+	source = EmptySource {untracked int32 maxEvents = 20}
 
 }
