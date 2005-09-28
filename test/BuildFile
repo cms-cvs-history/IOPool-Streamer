@@ -2,7 +2,7 @@
   <use name=boost>
   <use name=IOPool/Streamer>
   <use name=IOPool/OutputService>
-  <use name=IOPool/InputService>
+  <use name=IOPool/Input>
   <use name=FWCore/Framework>
   <use name=FWCore/Integration>
 
