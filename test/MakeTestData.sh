@@ -19,5 +19,5 @@ cmsRun --parameter-set ${FILE}_R2 || exit 1
 cmsRun --parameter-set ${FILE}_R3 || exit 1
 echo "Data written to $LOCAL_TMP_DIR"
 
-${LOCAL_TEST_BIN}/RunFileReader ${FILE}_R1 ${FILE}_R2 ${FILE}_R3
+${LOCAL_TEST_BIN}/RunFileReader_t ${FILE}_R1 ${FILE}_R2 ${FILE}_R3
 
