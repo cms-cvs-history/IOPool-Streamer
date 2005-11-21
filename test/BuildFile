@@ -8,9 +8,9 @@
      <flags TEST_RUNNER_ARGS=" 10 10 100 ">
   </bin>
 
-#  <bin file=RunThis_t.cpp>
-#     <flags TEST_RUNNER_ARGS=" /bin/bash RunSimple.sh">
-#  </bin>
+  <bin file=RunThis_t.cpp>
+     <flags TEST_RUNNER_ARGS=" /bin/bash IOPool/Streamer/test RunSimple.sh">
+  </bin>
 
  
 
