@@ -8,7 +8,7 @@ cd $LOCAL_TEST_DIR
 RC=0
 P=$$
 PREFIX=results_${USER}${P}
-OUTDIR=/tmp/${PREFIX}
+OUTDIR=${LOCAL_TMP_DIR}/${PREFIX}
 
 mkdir ${OUTDIR}
 cp *.cfg ${OUTDIR}
