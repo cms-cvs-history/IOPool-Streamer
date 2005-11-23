@@ -12,9 +12,9 @@
      <flags TEST_RUNNER_ARGS=" /bin/bash IOPool/Streamer/test RunSimple.sh">
   </bin>
 
-  <bin file=RunFileReader_t.cpp>
-     <flags TEST_RUNNER_ARGS=" data_1000.dat data_2000.dat data_3000.dat">
-  </bin>
+#  <bin file=RunFileReader_t.cpp>
+#     <flags TEST_RUNNER_ARGS=" data_1000.dat data_2000.dat data_3000.dat">
+#  </bin>
 
  
 
