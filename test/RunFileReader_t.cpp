@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------
 
- $Id$
+ $Id: RunFileReader_t.cpp,v 1.1 2005/11/22 16:28:44 jbk Exp $
 
 ----------------------------------------------------------------------*/  
 
@@ -110,6 +110,8 @@ Main::Main(const vector<string>& file_names):
   drain_()
 {
   cout << "ctor of Main" << endl;
+  // jbk - the next line should not be needed
+  // edm::declareStreamers(prods_);
   vector<string>::iterator it(names_.begin()),en(names_.end());
   for(;it!=en;++it)
     {
@@ -118,6 +120,7 @@ Main::Main(const vector<string>& file_names):
 					       prods_));
       readers_.push_back(p);
     }
+  edm::loadExtraClasses();
 }
 
 int Main::run()
