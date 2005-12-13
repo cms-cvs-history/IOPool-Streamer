@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------
 
- $Id: RunFileReader_t.cpp,v 1.1 2005/11/22 16:28:44 jbk Exp $
+ $Id: RunFileReader_t.cpp,v 1.2 2005/12/05 03:31:09 jbk Exp $
 
 ----------------------------------------------------------------------*/  
 
@@ -18,6 +18,8 @@
 
 #include "boost/shared_ptr.hpp"
 #include "boost/bind.hpp"
+
+#include "PluginManager/PluginManager.h"
 
 using namespace std;
 
@@ -42,7 +44,7 @@ class Drain
   boost::shared_ptr<boost::thread> me_;
 };
 
-Drain::Drain():count_(),q_(8,2*3)
+Drain::Drain():count_(),q_(sizeof(stor::FragEntry),2*3)
 {
 }
 
@@ -57,6 +59,7 @@ void Drain::start()
 
 void Drain::run(Drain* d)
 {
+  cout << "Drain::run " << (void*)d << endl;
   d->readData();
 }
 
@@ -67,9 +70,15 @@ void Drain::readData()
       edm::EventBuffer::ConsumerBuffer b(q_);
       if(b.size()==0) break;
 
+	  // cout << "Drain: " << (void*)this << " " << (void*)&q_ << endl;
+      // cout << "Drain: woke up " << b.size() << endl;
+
       stor::FragEntry* v = (stor::FragEntry*)b.buffer();
+      // cout << "Drain: cast frag " << b.buffer() << " " << v->buffer_size_ << endl;
       char* p = (char*)v->buffer_object_;
+      // cout << "Drain: get frag " << (void*)p << endl;
       delete [] p;
+      // cout << "Drain: delete frag " << b.size() << endl;
       ++count_;
     }
 
@@ -87,6 +96,7 @@ class Main
   int run();
 
  private:
+
   // disallow the following
   Main(const Main&) {} 
   Main& operator=(const Main&) { return *this; }
@@ -129,7 +139,7 @@ int Main::run()
   drain_.start();
 
   cout << "started the drain" << endl;
-  sleep(10);
+  // sleep(10);
 
   // start file readers
   Readers::iterator it(readers_.begin()),en(readers_.end());
@@ -147,6 +157,7 @@ int Main::run()
   edm::EventBuffer::ProducerBuffer b(drain_.getQueue());
   b.commit();
 
+  drain_.join();
   return 0;
 }
 
@@ -155,12 +166,14 @@ int main(int argc, char* argv[])
   // pull options out of command line
   if(argc < 2)
     {
-      cerr << "Usage: " << argv[0] << " "
+      cout << "Usage: " << argv[0] << " "
 	   << "file1 file2 ... fileN"
 	   << endl;
-      return -1;
+      return 0;
       //throw cms::Exception("config") << "Bad command line arguments\n";
     }
+
+  seal::PluginManager::get()->initialise();
   
   vector<string> file_names;
   
@@ -181,7 +194,12 @@ int main(int argc, char* argv[])
       cerr << "Caught an exception:\n" << e.what() << endl;
       throw;
     }
+  catch(...)
+  {
+      cerr << "Caught unknown exception\n" << endl;
+  }
 
+  cout << "Main is done!" << endl;
   return 0;
 }
 
