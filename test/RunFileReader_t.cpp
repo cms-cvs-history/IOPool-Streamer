@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------
 
- $Id: RunFileReader_t.cpp,v 1.2 2005/12/05 03:31:09 jbk Exp $
+ $Id: RunFileReader_t.cpp,v 1.3 2005/12/13 19:47:16 jbk Exp $
 
 ----------------------------------------------------------------------*/  
 
@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "FWCore/Framework/interface/ProductRegistry.h"
+#include "DataFormats/Common/interface/ProductRegistry.h"
 #include "FWCore/Utilities/interface/Exception.h"
 #include "IOPool/Streamer/interface/Utilities.h"
 #include "IOPool/Streamer/interface/TestFileReader.h"
