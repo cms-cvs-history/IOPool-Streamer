@@ -8,15 +8,17 @@
      <flags TEST_RUNNER_ARGS=" 10 10 100 ">
   </bin>
 
-  <bin file=RunThis_t.cpp>
-     <flags TEST_RUNNER_ARGS=" /bin/bash IOPool/Streamer/test RunSimple.sh">
+  <bin file=Eventmsg_t.cppunit.cpp>
+    <use name=cppunit>
   </bin>
-
+ 
   <bin file=RunFileReader_t.cpp>
 #     <flags TEST_RUNNER_ARGS=" data_1000.dat data_2000.dat data_3000.dat">
   </bin>
 
- 
+  <bin file=RunThis_t.cpp>
+     <flags TEST_RUNNER_ARGS=" /bin/bash IOPool/Streamer/test RunSimple.sh">
+  </bin>
 
   <library file="StreamThingProducer.cc" name=StreamThingProducer>
    <flags SEAL_PLUGIN_NAME="StreamThingProducer">
@@ -30,3 +32,6 @@
 
 </environment>
 
+#  <lib name=IOPoolStreamerData> 
+# The following test will not work until EventPrincipal is modified for easier unit testing.
+#<bin name=testPut file=testPut.cc></bin>
