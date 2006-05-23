@@ -21,9 +21,16 @@ cmsRun --parameter-set StreamCopy.cfg  > copy  2>&1
 # echo "CHECKSUM = 1" > out
 # echo "CHECKSUM = 1" > in
 
+ANS_OUT_SIZE=`grep -c CHECKSUM out`
 ANS_OUT=`grep CHECKSUM out`
 ANS_IN=`grep CHECKSUM in`
 ANS_COPY=`grep CHECKSUM copy`
+
+if [ "${ANS_OUT_SIZE}" == "0" ]
+then
+    echo "Simple Stream Test Failed (out was not created)"
+    RC=1
+fi
 
 if [ "${ANS_OUT}" != "${ANS_IN}" ]
 then
