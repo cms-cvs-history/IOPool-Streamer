@@ -1,7 +1,7 @@
 
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: EventStreamOutput.cc,v 1.17 2006/05/23 02:30:02 wmtan Exp $
+// $Id: EventStreamOutput.cc,v 1.19 2006/06/24 02:41:13 wmtan Exp $
 //
 // Class EventStreamOutput module
 //
@@ -62,8 +62,8 @@ namespace edm
 	  throw cms::Exception("NoData","EmptyDesc");
 
 	cout << "Prov:"
-	     << " " << spi->desc()->fullClassName_
-	     << " " << spi->desc()->productID_
+	     << " " << spi->desc()->className()
+	     << " " << spi->desc()->productID()
 	     << " " << spi->prov()->productID_
 	     << endl;
 
@@ -105,7 +105,7 @@ namespace edm
     for(;i!=e;++i) 
       {
 	sd.descs_.push_back(**i);
-	FDEBUG(9) << "StreamOutput got product = " << (*i)->fullClassName_
+	FDEBUG(9) << "StreamOutput got product = " << (*i)->className()
 		  << endl;
       }
 
@@ -155,7 +155,7 @@ namespace edm
     // Loop over EDProducts, fill the provenance, and write.
     for(; i != ie; ++i) {
       BranchDescription const& desc = **i;
-      ProductID const& id = desc.productID_;
+      ProductID const& id = desc.productID();
 
       if (id == ProductID()) {
 	throw edm::Exception(edm::errors::ProductNotFound,"InvalidID")
@@ -163,7 +163,7 @@ namespace edm
       }
       EventPrincipal::SharedGroupPtr const group = e.getGroup(id);
       if (group.get() == 0) {
-	std::string const& name = desc.fullClassName_;
+	std::string const& name = desc.className();
 	std::string const className = wrappedClassName(name);
 	TClass *cp = gROOT->GetClass(className.c_str());
 	if (cp == 0) {
@@ -189,8 +189,8 @@ namespace edm
     FDEBUG(11) << "-----Dump start" << endl;
     for(SendProds::iterator pii=se.prods_.begin();pii!=se.prods_.end();++pii)
       std::cout << "Prov:"
-	   << " " << pii->desc()->fullClassName_
-	   << " " << pii->desc()->productID_
+	   << " " << pii->desc()->className()
+	   << " " << pii->desc()->productID()
 	   << endl;      
     FDEBUG(11) << "-----Dump end" << endl;
 #endif
