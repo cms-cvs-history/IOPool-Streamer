@@ -7,6 +7,7 @@
   <bin file=EventMessageTest.cpp></bin>
   <bin file=ReadStreamerFile.cpp></bin>
   <bin file=WriteStreamerFile.cpp></bin>
+  <bin file=TestOtherMessage.cpp></bin>
 
   <bin file=EventBuffer_t.cpp>
      <flags TEST_RUNNER_ARGS=" 10 10 100 ">
