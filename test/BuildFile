@@ -23,8 +23,12 @@
   </bin>
 
   <bin file=RunThis_t.cpp>
-     <flags TEST_RUNNER_ARGS=" /bin/bash IOPool/Streamer/test RunSimple.sh">
+     <flags TEST_RUNNER_ARGS=" /bin/bash IOPool/Streamer/test RunSimple.sh RunSimple_NewStreamer.sh">
   </bin>
+
+#  <bin file=RunThis_t.cpp>
+#     <flags TEST_RUNNER_ARGS=" /bin/bash IOPool/Streamer/test RunSimple_NewStreamer.sh">
+#  </bin>
 
   <library file="StreamThingProducer.cc" name=StreamThingProducer>
    <flags SEAL_PLUGIN_NAME="StreamThingProducer">
