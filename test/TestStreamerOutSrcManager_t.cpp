@@ -14,6 +14,17 @@
 Disclaimer: Most of the code here is randomly written during
                testing various parts, its not a supported testing code.
                Changes can and will be made, when and if required.
+
+>>>>>>>>>>>
+Mind that config lines has no affect beside they provide OutputModules 
+for StreamerOutSrvcManager
+
+Theses lines below actauly controls Selection of Path in output files
+
+  //uint8 hltbits[] = "U";  //( 0 1 0 1 0 1 0 1)  select all paths, and BOTH files will have NO_OF_EVENTS
+  uint8 hltbits[] = "1";  //( 0 0 0 0 0 0 0 1)  select just p1, one file will have NO_OF_EVENTS, other will have none.
+
+
 */
 
 #include <iostream>
@@ -39,7 +50,7 @@ int main()
      {
         source = EmptySource
         {
-          untracked int32 maxEvents = 20
+          untracked int32 maxEvents = 200
         }
         module m1 = StreamThingProducer
         {
@@ -47,6 +58,10 @@ int main()
          int32 instance_count=5
         }
         module a1 = StreamThingAnalyzer { string product_to_get=\"m1\" }
+
+        module pre1 = Prescaler { int32 prescaleFactor = 5 }
+        module pre2 = Prescaler { int32 prescaleFactor = 2 }
+        module pre3 = Prescaler { int32 prescaleFactor = 4 }
 
         module out1 = EventStreamFileWriter
         {
@@ -69,11 +84,16 @@ int main()
           string fileName = \"teststreamfile2.dat\"
           string indexFileName = \"testindexfile2.ind\"
           # untracked int32 numPerFile = 5
-          untracked PSet SelectEvents = { vstring SelectEvents={\"p1\"}}
+          untracked PSet SelectEvents = { vstring SelectEvents={\"p2\"}}
         }
 
+        path p1 = { m1, a1}
+        path p2 = { m1, pre1 }
+        path p3 = { m1, pre2 }
+        path p4 = { m1, pre3 }
 
-        path p1 = { m1, a1 }
+        #path p1 = { m1, a1 }
+
         endpath e1 = { out1 }
         endpath e2 = { out2 }
      }";
@@ -92,8 +112,8 @@ int main()
   Strings hlt_names;
   Strings l1_names;
 
-  hlt_names.push_back("a");  hlt_names.push_back("b");
-  hlt_names.push_back("c");  hlt_names.push_back("d");
+  hlt_names.push_back("p1");  hlt_names.push_back("p2");
+  hlt_names.push_back("p3");  hlt_names.push_back("p4");
     
   l1_names.push_back("t10");  l1_names.push_back("t11");
   l1_names.push_back("t12");  
@@ -125,7 +145,8 @@ int main()
   // ------- event
 
   std::vector<bool> l1bit(3);
-  uint8 hltbits[] = "55";
+  //uint8 hltbits[] = "U";  //( 0 1 0 1 0 1 0 1)  select all paths
+  uint8 hltbits[] = "1";  //( 0 0 0 0 0 0 0 1)  select just p1 
   //const int hltsize = (sizeof(hltbits)-1)*4;
   const int hltsize = 4;  /** I am interested in 4 bits only */
 
