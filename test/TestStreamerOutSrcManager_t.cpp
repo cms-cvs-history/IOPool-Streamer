@@ -139,7 +139,7 @@ int main()
   double highWaterMark=1.0;
   std::string path="/cmsonline/home/anzar/StorageManagerTest/out";
   std::string mpath="/cmsonline/home/anzar/StorageManagerTest/out";
-  outMgr.manageInitMsg(maxFileSize, highWaterMark,
+  outMgr.manageInitMsg("teststreamer", maxFileSize, highWaterMark,
                   path, mpath, init_message);
 
   // ------- event
