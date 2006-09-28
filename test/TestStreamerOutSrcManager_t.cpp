@@ -46,57 +46,57 @@ typedef vector<uint8> Buffer;
 int main()
 {
   try { 
-  string config = "process PROD  =
-     {
-        source = EmptySource
-        {
-          untracked int32 maxEvents = 200
-        }
-        module m1 = StreamThingProducer
-        {
-         int32 array_size = 2 # 20000
-         int32 instance_count=5
-        }
-        module a1 = StreamThingAnalyzer { string product_to_get=\"m1\" }
+  string config = "process PROD  ="
+     "{"
+        "source = EmptySource"
+        "{"
+          "untracked int32 maxEvents = 200"
+        "}"
+        "module m1 = StreamThingProducer"
+        "{"
+         "int32 array_size = 2 # 20000"
+         "int32 instance_count=5"
+        "}"
+        "module a1 = StreamThingAnalyzer { string product_to_get='m1' }"
 
-        module pre1 = Prescaler { int32 prescaleFactor = 5 }
-        module pre2 = Prescaler { int32 prescaleFactor = 2 }
-        module pre3 = Prescaler { int32 prescaleFactor = 4 }
+        "module pre1 = Prescaler { int32 prescaleFactor = 5 }"
+        "module pre2 = Prescaler { int32 prescaleFactor = 2 }"
+        "module pre3 = Prescaler { int32 prescaleFactor = 4 }"
 
-        module out1 = EventStreamFileWriter
-        {
-          int32 max_event_size = 7000000
-          int32 max_queue_depth = 5
-          bool use_compression = true
-          int32 compression_level = 1
-          string fileName = \"teststreamfile1.dat\"
-          string indexFileName = \"testindexfile1.ind\"
-          # untracked int32 numPerFile = 5
-          untracked PSet SelectEvents = { vstring SelectEvents={\"p1\"}}
-        }
+        "module out1 = EventStreamFileWriter"
+        "{"
+          "int32 max_event_size = 7000000"
+          "int32 max_queue_depth = 5"
+          "bool use_compression = true"
+          "int32 compression_level = 1"
+          "string fileName = 'teststreamfile1.dat'"
+          "string indexFileName = 'testindexfile1.ind'"
+          "# untracked int32 numPerFile = 5"
+          "untracked PSet SelectEvents = { vstring SelectEvents={'p1'}}"
+        "}"
 
-        module out2 = EventStreamFileWriter
-        {
-          int32 max_event_size = 7000000
-          int32 max_queue_depth = 5
-          bool use_compression = true
-          int32 compression_level = 1
-          string fileName = \"teststreamfile2.dat\"
-          string indexFileName = \"testindexfile2.ind\"
-          # untracked int32 numPerFile = 5
-          untracked PSet SelectEvents = { vstring SelectEvents={\"p2\"}}
-        }
+        "module out2 = EventStreamFileWriter"
+        "{"
+          "int32 max_event_size = 7000000"
+          "int32 max_queue_depth = 5"
+          "bool use_compression = true"
+          "int32 compression_level = 1"
+          "string fileName = 'teststreamfile2.dat'"
+          "string indexFileName = 'testindexfile2.ind'"
+          "# untracked int32 numPerFile = 5"
+          "untracked PSet SelectEvents = { vstring SelectEvents={'p2'}}"
+        "}"
 
-        path p1 = { m1, a1}
-        path p2 = { m1, pre1 }
-        path p3 = { m1, pre2 }
-        path p4 = { m1, pre3 }
+        "path p1 = { m1, a1}"
+        "path p2 = { m1, pre1 }"
+        "path p3 = { m1, pre2 }"
+        "path p4 = { m1, pre3 }"
 
-        #path p1 = { m1, a1 }
+        "#path p1 = { m1, a1 }"
 
-        endpath e1 = { out1 }
-        endpath e2 = { out2 }
-     }";
+        "endpath e1 = { out1 }"
+        "endpath e2 = { out2 }"
+     "}";
 
   //Instantiate StreamerOutSrvcManager and process config
   edm::StreamerOutSrvcManager outMgr(config);
