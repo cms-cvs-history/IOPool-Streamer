@@ -140,7 +140,7 @@ int main()
   std::string path="/cmsonline/home/anzar/StorageManagerTest/out";
   std::string mpath="/cmsonline/home/anzar/StorageManagerTest/out";
   outMgr.manageInitMsg("teststreamer", maxFileSize, highWaterMark,
-                  path, mpath, init_message);
+                  path, mpath, "fileCatalog.txt", 0, init_message);
 
   // ------- event
 
