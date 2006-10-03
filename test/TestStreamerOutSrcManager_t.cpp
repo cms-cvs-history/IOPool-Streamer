@@ -136,10 +136,11 @@ int main()
   //Start the Streamer file
   cout<<"Trying to Write a Streamer file"<<endl; 
   unsigned long maxFileSize=1000000;
+  uint32 runNum = 0;
   double highWaterMark=1.0;
   std::string path="/cmsonline/home/anzar/StorageManagerTest/out";
   std::string mpath="/cmsonline/home/anzar/StorageManagerTest/out";
-  outMgr.manageInitMsg("teststreamer", maxFileSize, highWaterMark,
+  outMgr.manageInitMsg("teststreamer", runNum, maxFileSize, highWaterMark,
                   path, mpath, "fileCatalog.txt", 0, init_message);
 
   // ------- event
