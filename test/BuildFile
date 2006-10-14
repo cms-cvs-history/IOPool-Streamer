@@ -39,10 +39,11 @@
   <use name=IOPool/Streamer>
   </library>
 
-  <library file="StreamThingAnalyzer.cc" name=StreamThingAnalyzer>
-   <flags SEAL_PLUGIN_NAME="StreamThingAnalyzer">
-  <use name=IOPool/Streamer>
-  </library>
+# Temp remove this plugin for CMSSW_1_1_0_pre4:
+#  <library file="StreamThingAnalyzer.cc" name=StreamThingAnalyzer>
+#   <flags SEAL_PLUGIN_NAME="StreamThingAnalyzer">
+#  <use name=IOPool/Streamer>
+#  </library>
 
 </environment>
 
