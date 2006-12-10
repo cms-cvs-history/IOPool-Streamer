@@ -166,7 +166,7 @@ int main()
              emb.eventAddr());
 
     //Covert this to an EventView
-    EventMsgView eview(&buf[0],hltsize,l1bit.size());
+    EventMsgView eview(&buf[0]);
  
     //Lets write this to our streamer file.
     outMgr.manageEventMsg(eview);
