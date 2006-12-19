@@ -135,7 +135,7 @@ int main()
 
   //Start the Streamer file
   cout<<"Trying to Write a Streamer file"<<endl; 
-  unsigned long maxFileSize=1000000;
+  unsigned int maxFileSize=1000000U;
   uint32 runNum = 0;
   double highWaterMark=1.0;
   std::string path="/cmsonline/home/anzar/StorageManagerTest/out";
