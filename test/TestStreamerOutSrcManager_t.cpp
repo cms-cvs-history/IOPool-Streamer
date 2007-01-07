@@ -135,7 +135,7 @@ int main()
 
   //Start the Streamer file
   cout<<"Trying to Write a Streamer file"<<endl; 
-  outMgr.manageInitMsg("fileCatalog.txt", 0, init_message);
+  outMgr.manageInitMsg("fileCatalog.txt", 0, "test0", init_message);
 
   // ------- event
 
