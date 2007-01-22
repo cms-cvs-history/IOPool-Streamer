@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------
 
- $Id: RunFileReader_t.cpp,v 1.3 2005/12/13 19:47:16 jbk Exp $
+ $Id: RunFileReader_t.cpp,v 1.4 2006/02/08 00:44:31 wmtan Exp $
 
 ----------------------------------------------------------------------*/  
 
@@ -123,13 +123,12 @@ Main::Main(const vector<string>& file_names):
   // jbk - the next line should not be needed
   // edm::declareStreamers(prods_);
   vector<string>::iterator it(names_.begin()),en(names_.end());
-  for(;it!=en;++it)
-    {
+  for(; it != en; ++it) {
       ReaderPtr p(new edmtestp::TestFileReader(*it,
 					       drain_.getQueue(),
 					       prods_));
       readers_.push_back(p);
-    }
+  }
   edm::loadExtraClasses();
 }
 
@@ -143,15 +142,13 @@ int Main::run()
 
   // start file readers
   Readers::iterator it(readers_.begin()),en(readers_.end());
-  for(;it!=en;++it)
-    {
+  for(; it != en; ++it) {
       (*it)->start();
-    }
+  }
   // wait for all file readers to complete
-  for(it=readers_.begin();it!=en;++it)
-    {
+  for(it = readers_.begin(); it != en; ++it) {
       (*it)->join();
-    }
+  }
 
   // send done to the drain
   edm::EventBuffer::ProducerBuffer b(drain_.getQueue());
@@ -164,24 +161,22 @@ int Main::run()
 int main(int argc, char* argv[])
 {
   // pull options out of command line
-  if(argc < 2)
-    {
+  if(argc < 2) {
       cout << "Usage: " << argv[0] << " "
 	   << "file1 file2 ... fileN"
 	   << endl;
       return 0;
       //throw cms::Exception("config") << "Bad command line arguments\n";
-    }
+  }
 
   seal::PluginManager::get()->initialise();
   
   vector<string> file_names;
   
-  for(int i=1;i<argc;++i)
-    {
+  for(int i = 1; i < argc; ++i) {
       cout << argv[i] << endl;
       file_names.push_back(argv[i]);
-    }
+  }
   
   try {
     edm::loadExtraClasses();
@@ -189,13 +184,11 @@ int main(int argc, char* argv[])
     Main m(file_names);
     m.run();
   }
-  catch(cms::Exception& e)
-    {
+  catch(cms::Exception& e) {
       cerr << "Caught an exception:\n" << e.what() << endl;
       throw;
-    }
-  catch(...)
-  {
+  }
+  catch(...) {
       cerr << "Caught unknown exception\n" << endl;
   }
 
