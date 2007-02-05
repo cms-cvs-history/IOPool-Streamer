@@ -10,8 +10,6 @@
   <bin file=TestOtherMessage.cpp></bin>
   <bin file=TestStreamerStat.cpp></bin>
 
-  <bin file=TestStreamerOutSrcManager_t.cpp></bin> 
-
   <bin file=EventBuffer_t.cpp>
      <flags TEST_RUNNER_ARGS=" 10 10 100 ">
   </bin>
