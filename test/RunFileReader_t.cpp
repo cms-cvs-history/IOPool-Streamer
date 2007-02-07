@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------
 
- $Id: RunFileReader_t.cpp,v 1.4 2006/02/08 00:44:31 wmtan Exp $
+ $Id: RunFileReader_t.cpp,v 1.5 2007/01/22 21:52:24 wmtan Exp $
 
 ----------------------------------------------------------------------*/  
 
@@ -19,7 +19,7 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/bind.hpp"
 
-#include "PluginManager/PluginManager.h"
+#include "FWCore/PluginManager/interface/PluginManager.h"
 
 using namespace std;
 
