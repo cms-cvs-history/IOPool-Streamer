@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------
 
- $Id: RunFileReader_t.cpp,v 1.6 2007/02/07 21:29:22 wmtan Exp $
+ $Id: RunFileReader_t.cpp,v 1.7 2007/03/04 06:36:13 wmtan Exp $
 
 ----------------------------------------------------------------------*/  
 
@@ -20,7 +20,7 @@
 #include "boost/bind.hpp"
 
 #include "FWCore/PluginManager/interface/PluginManager.h"
-
+#include "FWCore/PluginManager/interface/standard.h"
 using namespace std;
 
 class Drain
@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
       //throw cms::Exception("config") << "Bad command line arguments\n";
   }
 
-  seal::PluginManager::get()->initialise();
+  edmplugin::PluginManager::configure(edmplugin::standard::config());
   
   vector<string> file_names;
   

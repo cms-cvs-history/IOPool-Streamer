@@ -33,12 +33,12 @@
 #  </bin>
 
   <library file="StreamThingProducer.cc" name=StreamThingProducer>
-   <flags SEAL_PLUGIN_NAME="StreamThingProducer">
+   <flags EDM_PLUGIN=1>
   <use name=IOPool/Streamer>
   </library>
 
   <library file="StreamThingAnalyzer.cc" name=StreamThingAnalyzer>
-   <flags SEAL_PLUGIN_NAME="StreamThingAnalyzer">
+   <flags EDM_PLUGIN=1>
   <use name=IOPool/Streamer>
   </library>
 
