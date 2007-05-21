@@ -6,6 +6,7 @@
 #include "FWCore/Framework/interface/EventPrincipal.h"
 
 #include "DataFormats/Provenance/interface/ProductRegistry.h"
+#include "DataFormats/Provenance/interface/ProcessHistoryRegistry.h"
 #include "FWCore/Utilities/interface/DebugMacros.h"
 
 #include <iostream>
@@ -66,8 +67,11 @@ namespace edm {
 	      << "' found in JobHeader. We can only support one.";
 	}
     }
-    deserializer_.setProcessConfiguration(
-	ProcessConfiguration(processName, ParameterSetID(), ReleaseVersion(), PassID()));
+    deserializer_.setProcessConfiguration(processConfiguration());
+    edm::ProcessHistory ph;
+    ph.reserve(1);
+    ph.push_back(edm::ProcessConfiguration(processName, ParameterSetID(), ReleaseVersion(), PassID()));
+    edm::ProcessHistoryRegistry::instance()->insertMapped(ph);
 
   }
 
