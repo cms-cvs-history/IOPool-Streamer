@@ -29,6 +29,7 @@ namespace edm
    */
   StreamDeserializer::StreamDeserializer():
     processConfiguration_(),
+    processHistoryID_(),
     tc_(getTClass(typeid(SendEvent))),
     dest_(init_size),
     xbuf_(TBuffer::kRead, init_size)
@@ -121,7 +122,8 @@ namespace edm
                                                    sd->time_,
                                                    productRegistry,
                                                    1,
-                                                   processConfiguration_));
+                                                   processConfiguration_,
+						   processHistoryID_));
     // no process name list handling
 
     SendProds::iterator spi(sd->prods_.begin()),spe(sd->prods_.end());
