@@ -1,4 +1,5 @@
 #include "IOPool/Streamer/interface/StreamerStatService.h"
+#include <fstream>
 #include <iostream>
 
 using namespace std;
