@@ -139,7 +139,6 @@ namespace edm
                                                    eventView.lumi(),
                                                    processConfiguration_,
                                                    true,
-						   EventAuxiliary::Unspecified,
 						   processHistoryID_));
     // no process name list handling
 
