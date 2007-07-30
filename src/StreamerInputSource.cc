@@ -66,11 +66,9 @@ namespace edm {
     //process name is already stored in deserializer_, if for Protocol version 4 and above.
     //From the INIT Message itself.
     
-    //---process name was not set correctly in the INIT message creation
-    //   use the one from the branch name instead
-    //if ( deserializer_.protocolVersion_ > 3) {
-    //       processName = deserializer_.processName_;
-    //} else { 
+    if ( deserializer_.protocolVersion_ > 3) {
+           processName = deserializer_.processName_;
+    } else { 
     	if (i != e) {
        		processName = i->processName();
 	}
@@ -84,7 +82,7 @@ namespace edm {
 	      		<< "' found in JobHeader. We can only support one.";
 		}
     	}
-    //}
+    }
 
     FDEBUG(10) << "StreamerInputSource::mergeWithRegistry :"<<processName<<std::endl; 
 

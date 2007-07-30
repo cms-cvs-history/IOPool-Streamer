@@ -1,7 +1,7 @@
 #ifndef StreamerOutputModule_h_
 #define StreamerOutputModule_h_
 
-// $Id: StreamerOutputModule.h,v 1.25 2007/05/01 22:41:11 hcheung Exp $
+// $Id: StreamerOutputModule.h,v 1.26 2007/05/15 21:30:33 afaq Exp $
 
 #include "FWCore/RootAutoLibraryLoader/interface/RootAutoLibraryLoader.h"
 #include "FWCore/Utilities/interface/Exception.h"
@@ -252,7 +252,7 @@ std::auto_ptr<InitMsgBuilder> StreamerOutputModule<Consumer>::serializeRegistry(
 
 
     //Setting the process name to HLT
-    std::string processName = "HLT";
+    std::string processName = OutputModule::processName();
 
     std::auto_ptr<InitMsgBuilder> init_message(
                                 new InitMsgBuilder(&prod_reg_buf_[0], prod_reg_buf_.size(),
