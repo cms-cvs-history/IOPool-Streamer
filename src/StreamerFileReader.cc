@@ -2,6 +2,7 @@
 #include "IOPool/Streamer/src/StreamerFileReader.h"
 #include "FWCore/Utilities/interface/Exception.h"
 #include "FWCore/Catalog/interface/FileCatalog.h"
+#include "FWCore/Catalog/interface/InputFileCatalog.h"
 
 using namespace edm;
 
