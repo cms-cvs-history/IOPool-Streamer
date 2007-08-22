@@ -11,8 +11,6 @@
 #include "IOPool/Streamer/interface/StreamerInputIndexFile.h"
 #include "IOPool/Streamer/interface/EventMessage.h"
 #include "IOPool/Streamer/interface/InitMessage.h"
-#include "IOPool/Streamer/interface/DumpTools.h"
-#include "FWCore/Framework/interface/EventSelector.h"
 
 using namespace boost::program_options;
 
