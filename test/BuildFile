@@ -27,12 +27,6 @@
      <flags TEST_RUNNER_ARGS=" /bin/bash IOPool/Streamer/test RunSimple_NewStreamer.sh">
   </bin>
 
-# Run simple tries to run obsolete tests and crashes, its commented out
-# we can safely remove it too
-#  <bin file=RunThis_t.cpp>
-#     <flags TEST_RUNNER_ARGS=" /bin/bash IOPool/Streamer/test RunSimple.sh">
-#  </bin>
-
   <library file="StreamThingProducer.cc" name=StreamThingProducer>
    <flags EDM_PLUGIN=1>
   <use name=IOPool/Streamer>
