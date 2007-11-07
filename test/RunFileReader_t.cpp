@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------
 
- $Id: RunFileReader_t.cpp,v 1.7 2007/03/04 06:36:13 wmtan Exp $
+ $Id: RunFileReader_t.cpp,v 1.8 2007/04/10 14:03:40 chrjones Exp $
 
 ----------------------------------------------------------------------*/  
 
@@ -21,7 +21,6 @@
 
 #include "FWCore/PluginManager/interface/PluginManager.h"
 #include "FWCore/PluginManager/interface/standard.h"
-using namespace std;
 
 class Drain
 {
@@ -59,7 +58,7 @@ void Drain::start()
 
 void Drain::run(Drain* d)
 {
-  cout << "Drain::run " << (void*)d << endl;
+  std::cout << "Drain::run " << (void*)d << std::endl;
   d->readData();
 }
 
@@ -70,19 +69,19 @@ void Drain::readData()
       edm::EventBuffer::ConsumerBuffer b(q_);
       if(b.size()==0) break;
 
-	  // cout << "Drain: " << (void*)this << " " << (void*)&q_ << endl;
-      // cout << "Drain: woke up " << b.size() << endl;
+	  // std::cout << "Drain: " << (void*)this << " " << (void*)&q_ << std::endl;
+      // std::cout << "Drain: woke up " << b.size() << std::endl;
 
       stor::FragEntry* v = (stor::FragEntry*)b.buffer();
-      // cout << "Drain: cast frag " << b.buffer() << " " << v->buffer_size_ << endl;
+      // std::cout << "Drain: cast frag " << b.buffer() << " " << v->buffer_size_ << std::endl;
       char* p = (char*)v->buffer_object_;
-      // cout << "Drain: get frag " << (void*)p << endl;
+      // std::cout << "Drain: get frag " << (void*)p << std::endl;
       delete [] p;
-      // cout << "Drain: delete frag " << b.size() << endl;
+      // std::cout << "Drain: delete frag " << b.size() << std::endl;
       ++count_;
     }
 
-  cout << "Drain: got " << count_ << " events" << endl;
+  std::cout << "Drain: got " << count_ << " events" << std::endl;
 }
 
 // -----------------------------------------------
@@ -90,7 +89,7 @@ void Drain::readData()
 class Main
 {
  public:
-  Main(const vector<string>& file_names);
+  Main(const std::vector<std::string>& file_names);
   ~Main();
   
   int run();
@@ -101,11 +100,11 @@ class Main
   Main(const Main&) {} 
   Main& operator=(const Main&) { return *this; }
 
-  vector<string> names_;
+  std::vector<std::string> names_;
   edm::ProductRegistry prods_;
   Drain drain_;
   typedef boost::shared_ptr<edmtestp::TestFileReader> ReaderPtr;
-  typedef vector<ReaderPtr> Readers;
+  typedef std::vector<ReaderPtr> Readers;
   Readers readers_;
 };
 
@@ -114,15 +113,15 @@ class Main
 Main::~Main() { }
 
 
-Main::Main(const vector<string>& file_names):
+Main::Main(const std::vector<std::string>& file_names):
   names_(file_names),
   prods_(edm::getRegFromFile(file_names[0])),
   drain_()
 {
-  cout << "ctor of Main" << endl;
+  std::cout << "ctor of Main" << std::endl;
   // jbk - the next line should not be needed
   // edm::declareStreamers(prods_);
-  vector<string>::iterator it(names_.begin()),en(names_.end());
+  std::vector<std::string>::iterator it(names_.begin()),en(names_.end());
   for(; it != en; ++it) {
       ReaderPtr p(new edmtestp::TestFileReader(*it,
 					       drain_.getQueue(),
@@ -134,10 +133,10 @@ Main::Main(const vector<string>& file_names):
 
 int Main::run()
 {
-  cout << "starting the drain" << endl;
+  std::cout << "starting the drain" << std::endl;
   drain_.start();
 
-  cout << "started the drain" << endl;
+  std::cout << "started the drain" << std::endl;
   // sleep(10);
 
   // start file readers
@@ -162,37 +161,37 @@ int main(int argc, char* argv[])
 {
   // pull options out of command line
   if(argc < 2) {
-      cout << "Usage: " << argv[0] << " "
+      std::cout << "Usage: " << argv[0] << " "
 	   << "file1 file2 ... fileN"
-	   << endl;
+	   << std::endl;
       return 0;
       //throw cms::Exception("config") << "Bad command line arguments\n";
   }
 
   edmplugin::PluginManager::configure(edmplugin::standard::config());
   
-  vector<string> file_names;
+  std::vector<std::string> file_names;
   
   for(int i = 1; i < argc; ++i) {
-      cout << argv[i] << endl;
+      std::cout << argv[i] << std::endl;
       file_names.push_back(argv[i]);
   }
   
   try {
     edm::loadExtraClasses();
-    cout << "Done loading extra classes" << endl;
+    std::cout << "Done loading extra classes" << std::endl;
     Main m(file_names);
     m.run();
   }
   catch(cms::Exception& e) {
-      cerr << "Caught an exception:\n" << e.what() << endl;
+      std::cerr << "Caught an exception:\n" << e.what() << std::endl;
       throw;
   }
   catch(...) {
-      cerr << "Caught unknown exception\n" << endl;
+      std::cerr << "Caught unknown exception\n" << std::endl;
   }
 
-  cout << "Main is done!" << endl;
+  std::cout << "Main is done!" << std::endl;
   return 0;
 }
 

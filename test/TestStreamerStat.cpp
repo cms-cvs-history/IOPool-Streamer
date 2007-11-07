@@ -2,8 +2,6 @@
 #include <fstream>
 #include <iostream>
 
-using namespace std;
-
 void writeStat()
   {
    //Write a Stat file
@@ -14,7 +12,7 @@ void writeStat()
        new_stat.advanceFileSize(i*10);
        }
     new_stat.writeStat();
-    cout << "Written/Appened Stat file: TESTStream.stat" << endl;
+    std::cout << "Written/Appened Stat file: TESTStream.stat" << std::endl;
   }
 
 void readStat()
@@ -24,7 +22,7 @@ void readStat()
    while (old_stat.next() )
        {
         edm::StatSummary currentRecord = old_stat.getRecord();
-        cout<< "Stat Record : " <<
+        std::cout<< "Stat Record : " <<
         currentRecord.run_ <<
         currentRecord.streamer_ <<
         currentRecord.dataFile_ <<
@@ -34,7 +32,7 @@ void readStat()
         currentRecord.startDate_ <<
         currentRecord.startTime_ <<
         currentRecord.endDate_ <<
-        currentRecord.endTime_ << endl;  
+        currentRecord.endTime_ << std::endl;  
        }
     }
 
