@@ -8,7 +8,6 @@
   <bin file=ReadStreamerFile.cpp></bin>
   <bin file=WriteStreamerFile.cpp></bin>
   <bin file=TestOtherMessage.cpp></bin>
-  <bin file=TestStreamerStat.cpp></bin>
   <bin file=WriteDQMToFile.cpp></bin>
 
   <bin file=EventBuffer_t.cpp>
