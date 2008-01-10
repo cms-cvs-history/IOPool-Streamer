@@ -27,10 +27,10 @@ void convertTriggers(unsigned char c, std::vector<int> & results){
    */
 
   for (int i = 3; i >= 0; --i) {
-    int shift = 2*i;
-    int bit1 = ((c >> (shift+1)) & 1);
-    int bit2 = ((c >> shift) & 1);
-    int trigVal = (2*bit1) + bit2;
+    const int shift = 2*i;
+    const int bit1 = ((c >> (shift+1)) & 1);
+    const int bit2 = ((c >> shift) & 1);
+    const int trigVal = (2*bit1) + bit2;
    
     results.push_back(trigVal);
   }
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
    * Main program
    *
    */
-  std::string const kProgramName = argv[0];
+  std::string kProgramName = argv[0];
 
   /*
    * Command line setup and parsing
@@ -54,8 +54,7 @@ int main(int argc, char* argv[]) {
   options_description desc("Allowed options");
   desc.add_options()
     ("help,h", "produce help message")
-    ("in,i", value<std::string>(), "input file")
-    ("out,o", value<std::string>(), "output file");
+    ("in,i", value<std::string>(), "input file");
 
   positional_options_description p;
 
@@ -80,11 +79,6 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   
-  if (!vm.count("out")) {
-    std::cerr << "output not set.\n";
-    return 1;
-  }
-
   if (!vm.count("in")) {
     std::cerr << "input not set.\n";
     return 1;
@@ -94,20 +88,16 @@ int main(int argc, char* argv[]) {
    * Input Streamer Index file and output XML file
    */
   std::string in = vm["in"].as<std::string>(); 
-  std::string outf = vm["out"].as<std::string>(); 
 
-  std::cout << "Input = " << in << std::endl;
-  std::cout << "Output = " << outf << std::endl;
-  
   
   /*
    * First read in the streamer index file
    * and get the Init Message
    *
    */
-  StreamerInputIndexFile * indexFile = new StreamerInputIndexFile(in);
-  const StartIndexRecord* startindx = indexFile->startMessage();
-  const InitMsgView* start = startindx->getInit();
+  StreamerInputIndexFile* const indexFile = new StreamerInputIndexFile(in);
+  const StartIndexRecord* const startindx = indexFile->startMessage();
+  const InitMsgView* const start = startindx->getInit();
 
   /*
    * Extract the list of trigger names and the number of trigger bit entries 
@@ -118,18 +108,14 @@ int main(int argc, char* argv[]) {
 
   std::map<std::string, int> eventsPerTrigger;
   std::map<std::string, int> errorsPerTrigger;
-  
-  
 
-  std::vector<std::string>::iterator iName;
-  for (iName = vhltnames.begin(); iName != vhltnames.end(); iName++){
-    eventsPerTrigger[*iName] = 0;
-    errorsPerTrigger[*iName] = 0;
+  for (std::vector<std::string>::const_iterator it = vhltnames.begin(), itEnd = vhltnames.end(); it != itEnd; ++it) {
+    eventsPerTrigger[*it] = 0;
+    errorsPerTrigger[*it] = 0;
   }
-  
 
-  int runNumber = 0;
-  int lumiNumber = 0;
+  // int runNumber = 0;
+  // int lumiNumber = 0;
   int eventCount = 0;
 
   /*
@@ -139,9 +125,9 @@ int main(int argc, char* argv[]) {
    */
   for(indexRecIter it = indexFile->begin(), itEnd = indexFile->end(); it != itEnd; ++it) {
     
-    const EventMsgView* iview = (*it)->getEventView();
-    runNumber = iview->run();
-    lumiNumber = iview->lumi();
+    const EventMsgView* const iview = (*it)->getEventView();
+    // runNumber = iview->run();
+    // lumiNumber = iview->lumi();
     eventCount++;
     /*
      * Extract the trigger bits
@@ -167,7 +153,7 @@ int main(int argc, char* argv[]) {
      */
     for (int i=0; i < hltBitCount; i++){
       std::string triggerName = vhltnames[i];
-      int triggerBit = triggerResults[i];
+      const int triggerBit = triggerResults[i];
       if ( triggerBit == 1) 
 	eventsPerTrigger[triggerName]++;
       if ( triggerBit == 3)
@@ -176,33 +162,24 @@ int main(int argc, char* argv[]) {
         
  
   } // End loop over event headers
-  
+
+
   /*
-   * Write summary for each path
+   * Print out summary
    *
    */
-  std::ofstream outputXML(outf.c_str(), std::ios::out );
-  
-  outputXML << "<StreamerIndex Run=\"" << runNumber <<"\" Lumi=\""
-	    << lumiNumber << "\" TotalEvents=\"" << eventCount 
-	    << "\" >\n";
-  std::vector<std::string>::iterator iTrig;
-  for (iTrig = vhltnames.begin(); iTrig != vhltnames.end(); iTrig++){
-    int evCount = eventsPerTrigger[*iTrig];
-    int errCount = errorsPerTrigger[*iTrig];
-    
-    if ( (evCount == 0) && (errCount == 0) ) 
-      continue;
-	
-    outputXML << "  <TriggerPath Name=\"" << *iTrig <<"\">\n"
-	      << "     <EventCount Value=\""<<eventsPerTrigger[*iTrig]<< "\"/>\n"
-	      << "     <ErrorCount Value=\""<<errorsPerTrigger[*iTrig]<< "\"/>\n"
-	      << "  </TriggerPath>\n";
-    
 
+  for (std::vector<std::string>::const_iterator it = vhltnames.begin(), itEnd = vhltnames.end(); it != itEnd; ++it) {
+
+    const int eventCount = eventsPerTrigger[*it];
+    const int errorCount = errorsPerTrigger[*it];
+
+    if ( (eventCount == 0) && (errorCount == 0) )
+      continue;
+
+    std::cout << ":" << *it << "," << eventCount << "," << errorCount;
   }
-  outputXML << "</StreamerIndex>\n";
-  outputXML.close();
+
   return 0;
 }
   
