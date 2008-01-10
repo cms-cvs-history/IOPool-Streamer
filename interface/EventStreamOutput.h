@@ -1,5 +1,5 @@
-#ifndef IOPool_Streamer_EventStreamOutput_h
-#define IOPool_Streamer_EventStreamOutput_h
+#ifndef Streamer_EventStreamOutput_h
+#define Streamer_EventStreamOutput_h
 
 // -*- C++ -*-
 
@@ -25,7 +25,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/EventPrincipal.h"
 #include "FWCore/Framework/interface/OutputModule.h"
-#include "DataFormats/Provenance/interface/Selections.h"
 
 #include <iostream>
 #include <vector>
@@ -41,6 +40,7 @@ namespace edm
   {
   public:
     typedef std::vector<char> ProdRegBuf;
+    typedef OutputModule::Selections Selections;
 
     EventStreamerImpl(ParameterSet const& ps,
 		      Selections const* selections,
@@ -97,7 +97,7 @@ namespace edm
     OutputModule(ps),
     bufs_(getEventBuffer(ps.template getParameter<int>("max_event_size"),
 			 ps.template getParameter<int>("max_queue_depth"))),
-    es_(ps,&keptProducts()[InEvent],bufs_),
+    es_(ps,&descVec_[InEvent],bufs_),
     c_(ps.template getParameter<ParameterSet>("consumer_config"),bufs_)
   {
     // temporary hack
@@ -122,7 +122,7 @@ namespace edm
   template <class Consumer>
   void EventStreamingModule<Consumer>::write(EventPrincipal const& e)
   {
-    // b contains the serialized data, the provenance information, and event
+    // b contains the serialized data, the provanence information, and event
     // header data - the collision ID and trigger bits, the object lifetime
     // is managed by the es_ object.
     es_.serialize(e);
@@ -134,7 +134,7 @@ namespace edm
   {
     //std::cerr << "In beginJob" << std::endl;
 
-    es_.serializeRegistry(keptProducts()[InEvent]);
+    es_.serializeRegistry(descVec_[InEvent]);
     c_.sendRegistry(es_.registryBuffer(),es_.registryBufferSize());
 
   }
