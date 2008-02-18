@@ -31,7 +31,7 @@ void convertTriggers(unsigned char c, std::vector<int> & results){
     const int bit1 = ((c >> (shift+1)) & 1);
     const int bit2 = ((c >> shift) & 1);
     const int trigVal = (2*bit1) + bit2;
-   
+
     results.push_back(trigVal);
   }
 
@@ -106,28 +106,18 @@ int main(int argc, char* argv[]) {
   start->hltTriggerNames(vhltnames);
   int hltBitCount = start->get_hlt_bit_cnt();
 
-  std::map<std::string, int> eventsPerTrigger;
-  std::map<std::string, int> errorsPerTrigger;
-
-  for (std::vector<std::string>::const_iterator it = vhltnames.begin(), itEnd = vhltnames.end(); it != itEnd; ++it) {
-    eventsPerTrigger[*it] = 0;
-    errorsPerTrigger[*it] = 0;
-  }
-
-  // int runNumber = 0;
-  // int lumiNumber = 0;
-  int eventCount = 0;
+  std::map<std::string, std::vector<unsigned int> > eventsPerTrigger;
+  std::map<std::string, std::vector<unsigned int> > errorsPerTrigger;
 
   /*
    * Process each event header in the index, by extracting the hlt trigger bits
    * HLT bits are 2 bits long
    *
    */
+  unsigned int eventCount = 0;
   for(indexRecIter it = indexFile->begin(), itEnd = indexFile->end(); it != itEnd; ++it) {
     
     const EventMsgView* const iview = (*it)->getEventView();
-    // runNumber = iview->run();
-    // lumiNumber = iview->lumi();
     eventCount++;
     /*
      * Extract the trigger bits
@@ -135,17 +125,17 @@ int main(int argc, char* argv[]) {
     std::vector<unsigned char> hlt_out;
     hlt_out.resize(1 + (iview->hltCount()-1)/4);
     iview->hltTriggerBits(&hlt_out[0]);
-    
+
     /*
      * Convert the trigger bits into 2 bit integers
      *
      */
     std::vector<int> triggerResults;
-    for(int i=(hlt_out.size()-1); i != -1 ; --i) {
-      convertTriggers(hlt_out[i], triggerResults);
+    for ( std::vector<unsigned char>::const_reverse_iterator it = hlt_out.rbegin(), itEnd = hlt_out.rend(); it != itEnd; ++it) {
+      convertTriggers(*it, triggerResults);
     }
-    
     std::reverse(triggerResults.begin(), triggerResults.end());
+
     /*
      * Walk through the trigger paths and trigger bits and record the states in the
      * maps available
@@ -155,9 +145,9 @@ int main(int argc, char* argv[]) {
       std::string triggerName = vhltnames[i];
       const int triggerBit = triggerResults[i];
       if ( triggerBit == 1) 
-	eventsPerTrigger[triggerName]++;
+	eventsPerTrigger[triggerName].push_back(eventCount);
       if ( triggerBit == 3)
-	errorsPerTrigger[triggerName]++;
+	errorsPerTrigger[triggerName].push_back(eventCount);
     }
         
  
@@ -171,13 +161,27 @@ int main(int argc, char* argv[]) {
 
   for (std::vector<std::string>::const_iterator it = vhltnames.begin(), itEnd = vhltnames.end(); it != itEnd; ++it) {
 
-    const int eventCount = eventsPerTrigger[*it];
-    const int errorCount = errorsPerTrigger[*it];
+    std::vector<unsigned int> events = eventsPerTrigger[*it];
+    std::vector<unsigned int> errors = errorsPerTrigger[*it];
 
-    if ( (eventCount == 0) && (errorCount == 0) )
-      continue;
+    //if ( events.size() > 0 )
+      {
+	std::cout << ":" << *it;
 
-    std::cout << ":" << *it << "," << eventCount << "," << errorCount;
+	unsigned int eventCount = 0;
+	for (std::vector<unsigned int>::const_iterator it = events.begin(), itEnd = events.end(); it != itEnd; ++it) {
+	  //std::cout << "," << *it;
+	  ++eventCount;
+	}
+
+	unsigned int errorCount = 0;
+	for (std::vector<unsigned int>::const_iterator it = errors.begin(), itEnd = errors.end(); it != itEnd; ++it) {
+	  //std::cout << "," << *it;
+	  ++errorCount;
+	}
+
+	std::cout << "," << eventCount << "," << errorCount;
+      }
   }
 
   return 0;
