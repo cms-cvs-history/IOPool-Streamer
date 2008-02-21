@@ -1,8 +1,8 @@
 <environment>
   <use name=boost>
-  <use name=IOPool/Streamer>
-  <use name=FWCore/Framework>
   <use name=DataFormats/TestObjects>
+  <use name=FWCore/Framework>
+  <use name=IOPool/Streamer>
 
   <bin file=EventMessageTest.cpp></bin>
   <bin file=ReadStreamerFile.cpp></bin>
@@ -28,12 +28,10 @@
 
   <library file="StreamThingProducer.cc" name=StreamThingProducer>
    <flags EDM_PLUGIN=1>
-  <use name=IOPool/Streamer>
   </library>
 
   <library file="StreamThingAnalyzer.cc" name=StreamThingAnalyzer>
    <flags EDM_PLUGIN=1>
-  <use name=IOPool/Streamer>
   </library>
 
 </environment>
