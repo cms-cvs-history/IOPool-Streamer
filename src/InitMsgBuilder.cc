@@ -37,7 +37,7 @@ InitMsgBuilder::InitMsgBuilder(void* buf, uint32 size,
 
   // output module label next
   uint32 outmod_label_len = strlen(output_module_label);
-  assert(outmod_label_len < 0x01ff);
+  assert(outmod_label_len < 0x00ff);
   *pos++ = outmod_label_len;
   memcpy(pos,output_module_label,outmod_label_len);
   pos += outmod_label_len;
@@ -60,7 +60,7 @@ InitMsgBuilder::InitMsgBuilder(void* buf, uint32 size,
   if (l1_sz != 0) l1_sz = 1 + ((l1_sz-1)/8);
 
   //Size of Event Header
-  uint32 eventHeaderSize = 1+ (8*4) + hlt_sz + l1_sz;
+  uint32 eventHeaderSize = 2 + (9*4) + hlt_sz + l1_sz;
   convert(eventHeaderSize, h->event_header_size_);
 }
 
