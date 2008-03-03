@@ -7,16 +7,9 @@
 #include "FWCore/Utilities/interface/Algorithms.h"
 #include <iostream>
 #include <iterator>
+#include "TBuffer.h"
 #include "DataFormats/Streamer/interface/StreamedProducts.h"
 #include "IOPool/Streamer/interface/ClassFiller.h"
-
-#if ROOT_VERSION_CODE >= ROOT_VERSION(5,15,0)
-#include "TBufferFile.h"
-typedef TBufferFile RootBuffer;
-#else
-#include "TBuffer.h"
-typedef TBuffer RootBuffer;
-#endif
 
 using namespace edm;
 
@@ -93,7 +86,7 @@ void dumpInitVerbose(const InitMsgView* view)
   dumpInitHeader(view);
 
   TClass* desc = getTClass(typeid(SendJobHeader));
-  RootBuffer xbuf(TBuffer::kRead, view->descLength(),
+  TBuffer xbuf(TBuffer::kRead, view->descLength(),
                (char*)view->descData(), kFALSE);
   std::auto_ptr<SendJobHeader> sd((SendJobHeader*)xbuf.ReadObjectAny(desc));
 

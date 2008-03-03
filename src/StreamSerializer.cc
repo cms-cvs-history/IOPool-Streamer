@@ -139,12 +139,24 @@ namespace edm
         throw Exception(errors::ProductNotFound,"InvalidID")
           << "StreamSerializer::serializeEvent: invalid ProductID supplied in productRegistry\n";
       }
-      BasicHandle const bh = eventPrincipal.getForOutput(id, true, true);
+      BasicHandle const bh = eventPrincipal.getForOutput(id, true);
       if (bh.provenance() == 0) {
-	// No product with this ID was put in the event.
+	// No group with this ID is in the event.
 	// Create and write the provenance.
-        dummyProvenances.push_front(Provenance(desc, EntryDescription()));
-        se.prods_.push_back(ProdPair(0, &*dummyProvenances.begin()));
+	if (desc.produced_) {
+          BranchEntryDescription provenance;
+	  provenance.moduleDescriptionID_ = desc.moduleDescriptionID_;
+	  provenance.productID_ = id;
+	  provenance.status_ = BranchEntryDescription::CreatorNotRun;
+	  provenance.isPresent_ = false;
+	  provenance.cid_ = 0;
+          dummyProvenances.push_front(Provenance(desc, provenance));
+          se.prods_.push_back(ProdPair(0, &*dummyProvenances.begin()));
+	} else {
+	    throw edm::Exception(errors::ProductNotFound,"NoMatch")
+	      << "PoolOutputModule: Unexpected internal error.  Contact the framework group.\n"
+	      << "No group for branch" << desc.branchName_ << '\n';
+	}
       } else {
         se.prods_.push_back(ProdPair(bh.wrapper(), bh.provenance()));
       }
