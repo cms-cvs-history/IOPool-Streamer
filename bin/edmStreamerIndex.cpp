@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <iosfwd>
+#include <iomanip> 
 #include <string>
 #include <vector>
 #include <map>
@@ -18,15 +19,14 @@ using namespace boost::program_options;
 // -----------------------------------------------
 
 
-
-void convertTriggers(unsigned char c, std::vector<int> & results){
+void convertTriggers(unsigned char c, std::vector<int> & results) {
   /*
    * Util to convert an 8 bit word into 4x2 bit integer HLT Trigger Bits
    * c = AABBCCDD
    * results will get AA, BB, CC, DD converted to (0,1,2,3) and added to it.
    */
 
-  for (int i = 3; i >= 0; --i) {
+  for (int i = 0; i < 4; ++i) {
     const int shift = 2*i;
     const int bit1 = ((c >> (shift+1)) & 1);
     const int bit2 = ((c >> shift) & 1);
@@ -34,11 +34,7 @@ void convertTriggers(unsigned char c, std::vector<int> & results){
 
     results.push_back(trigVal);
   }
-
 }
-
-
-
 
 
 int main(int argc, char* argv[]) {
@@ -118,7 +114,7 @@ int main(int argc, char* argv[]) {
   for(indexRecIter it = indexFile->begin(), itEnd = indexFile->end(); it != itEnd; ++it) {
     
     const EventMsgView* const iview = (*it)->getEventView();
-    eventCount++;
+
     /*
      * Extract the trigger bits
      */
@@ -131,17 +127,16 @@ int main(int argc, char* argv[]) {
      *
      */
     std::vector<int> triggerResults;
-    for ( std::vector<unsigned char>::const_reverse_iterator it = hlt_out.rbegin(), itEnd = hlt_out.rend(); it != itEnd; ++it) {
+    for ( std::vector<unsigned char>::const_iterator it = hlt_out.begin(), itEnd = hlt_out.end(); it != itEnd; ++it) {
       convertTriggers(*it, triggerResults);
     }
-    std::reverse(triggerResults.begin(), triggerResults.end());
 
     /*
      * Walk through the trigger paths and trigger bits and record the states in the
      * maps available
      *
      */
-    for (int i=0; i < hltBitCount; i++){
+    for (unsigned int i=0; i < hltBitCount; i++){
       std::string triggerName = vhltnames[i];
       const int triggerBit = triggerResults[i];
       if ( triggerBit == 1) 
@@ -149,8 +144,9 @@ int main(int argc, char* argv[]) {
       if ( triggerBit == 3)
 	errorsPerTrigger[triggerName].push_back(eventCount);
     }
-        
- 
+
+    eventCount++;
+
   } // End loop over event headers
 
 
@@ -164,24 +160,42 @@ int main(int argc, char* argv[]) {
     std::vector<unsigned int> events = eventsPerTrigger[*it];
     std::vector<unsigned int> errors = errorsPerTrigger[*it];
 
-    //if ( events.size() > 0 )
-      {
-	std::cout << ":" << *it;
+    // print trigger path name
+    std::cout << ":" << *it;
 
-	unsigned int eventCount = 0;
-	for (std::vector<unsigned int>::const_iterator it = events.begin(), itEnd = events.end(); it != itEnd; ++it) {
-	  //std::cout << "," << *it;
-	  ++eventCount;
-	}
+//     unsigned int eventCount = 0;
+//     for (std::vector<unsigned int>::const_iterator it = events.begin(), itEnd = events.end(); it != itEnd; ++it) {
+//       ++eventCount;
+//     }
 
-	unsigned int errorCount = 0;
-	for (std::vector<unsigned int>::const_iterator it = errors.begin(), itEnd = errors.end(); it != itEnd; ++it) {
-	  //std::cout << "," << *it;
-	  ++errorCount;
-	}
+//     unsigned int errorCount = 0;
+//     for (std::vector<unsigned int>::const_iterator it = errors.begin(), itEnd = errors.end(); it != itEnd; ++it) {
+//       ++errorCount;
+//     }
 
-	std::cout << "," << eventCount << "," << errorCount;
-      }
+//     std::cout << "," << eventCount << "," << errorCount;
+
+    // how many integers do we need ?
+    unsigned int intCount = eventCount / (sizeof(unsigned int)*8);
+    if ( (eventCount % (sizeof(unsigned int)*8) ) != 0 )
+      ++intCount;
+
+    // prepare and initialize integers
+    std::vector<unsigned int> eventBitPattern;
+    eventBitPattern.resize(intCount);
+
+    // fill integers, use their bits
+    for (std::vector<unsigned int>::const_iterator it = events.begin(), itEnd = events.end(); it != itEnd; ++it) {
+      eventBitPattern[ *it / (sizeof(unsigned int)*8) ] |= ( 1 << *it % (sizeof(unsigned int)*8) );
+    }
+
+    // print integers
+    for (std::vector<unsigned int>::const_iterator it = eventBitPattern.begin(), itEnd = eventBitPattern.end(); it != itEnd; ++it) {
+      std::cout << "," << std::hex << *it;
+    }
+
+    std::cout << std::endl;
+
   }
 
   return 0;
