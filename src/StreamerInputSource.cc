@@ -8,10 +8,8 @@
 #include "FWCore/Framework/interface/EventPrincipal.h"
 #include "FWCore/Framework/interface/FileBlock.h"
 #include "DataFormats/Provenance/interface/BranchDescription.h"
-#include "DataFormats/Provenance/interface/EntryDescription.h"
-#include "DataFormats/Provenance/interface/EventAuxiliary.h"
-#include "DataFormats/Provenance/interface/LuminosityBlockAuxiliary.h"
-#include "DataFormats/Provenance/interface/RunAuxiliary.h"
+#include "DataFormats/Provenance/interface/BranchEntryDescription.h"
+
 
 #include "zlib.h"
 
@@ -310,30 +308,34 @@ namespace edm {
     FDEBUG(5) << "Got event: " << sd->id_ << " " << sd->prods_.size() << std::endl;
     if(!runPrincipal() || runPrincipal()->run() != sd->id_.run()) {
 	newRun_ = newLumi_ = true;
-	RunAuxiliary runAux(sd->id_.run(), sd->time_, Timestamp::invalidTimestamp());
 	setRunPrincipal(boost::shared_ptr<RunPrincipal>(
-          new RunPrincipal(runAux,
+          new RunPrincipal(sd->id_.run(),
+			   sd->time_,
+			   Timestamp::invalidTimestamp(),
 			   productRegistry(),
 			   processConfiguration())));
         resetLuminosityBlockPrincipal();
     }
     if(!luminosityBlockPrincipal() || luminosityBlockPrincipal()->luminosityBlock() != eventView.lumi()) {
-      
-      LuminosityBlockAuxiliary lumiAux(runPrincipal()->run(), eventView.lumi(), sd->time_, Timestamp::invalidTimestamp());
       setLuminosityBlockPrincipal(boost::shared_ptr<LuminosityBlockPrincipal>(
-        new LuminosityBlockPrincipal(lumiAux,
+        new LuminosityBlockPrincipal(eventView.lumi(),
+				     sd->time_,
+				     Timestamp::invalidTimestamp(),
 				     productRegistry(),
 				     runPrincipal(),
 				     processConfiguration())));
       newLumi_ = true;
     }
-
-    EventAuxiliary eventAux(sd->id_,
-      processGUID(), sd->time_, luminosityBlockPrincipal()->luminosityBlock(), true);
-    std::auto_ptr<EventPrincipal> ep(new EventPrincipal(eventAux,
+    std::auto_ptr<EventPrincipal> ep(new EventPrincipal(sd->id_,
+						   processGUID(),
+                                                   sd->time_,
                                                    productRegistry(),
                                                    luminosityBlockPrincipal(),
                                                    processConfiguration(),
+                                                   true,
+						   EventAuxiliary::Any,
+						   EventPrincipal::invalidBunchXing,
+						   EventPrincipal::invalidStoreNumber,
 						   processHistoryID_));
     // no process name list handling
 
@@ -348,29 +350,41 @@ namespace edm {
              << " " << spi->desc()->className()
              << " " << spi->desc()->productInstanceName()
              << " " << spi->desc()->productID()
+             << " " << spi->prov()->productID_
              << std::endl;
 
-        std::auto_ptr<EntryDescription>
-          aedesc(const_cast<EntryDescription*>(spi->prov()));
+        std::auto_ptr<BranchEntryDescription>
+          aedesc(const_cast<BranchEntryDescription*>(spi->prov()));
         std::auto_ptr<BranchDescription>
           adesc(const_cast<BranchDescription*>(spi->desc()));
 
         std::auto_ptr<Provenance> aprov(new Provenance(*(adesc.get()), *(aedesc.get())));
-        if(spi->prod() != 0) {
+        if(aprov->isPresent()) {
+          if(spi->prod() == 0) {
+            FDEBUG(10) << "Product is null" << std::endl;
+            throw cms::Exception("StreamTranslation","EmptyProduct");
+          }
           std::auto_ptr<EDProduct>
             aprod(const_cast<EDProduct*>(spi->prod()));
           FDEBUG(10) << "addgroup next " << aprov->productID() << std::endl;
+          FDEBUG(10) << "addgroup next " << aprov->event().productID_ << std::endl;
           ep->addGroup(aprod, aprov);
           FDEBUG(10) << "addgroup done" << std::endl;
         } else {
+          if(spi->prod() != 0) {
+            FDEBUG(10) << "Product not null but is marked as not present" << std::endl;
+            throw cms::Exception("StreamTranslation","NonEmptyProductMarkedAsNotPresent");
+          }
           FDEBUG(10) << "addgroup empty next " << aprov->productID() << std::endl;
+          FDEBUG(10) << "addgroup empty next " << aprov->event().productID_ 
+                                               << std::endl;
           ep->addGroup(aprov);
           FDEBUG(10) << "addgroup empty done" << std::endl;
         }
         spi->clear();
     }
 
-    FDEBUG(10) << "Size = " << ep->size() << std::endl;
+    FDEBUG(10) << "Size = " << ep->numEDProducts() << std::endl;
 
     return ep;     
   }
