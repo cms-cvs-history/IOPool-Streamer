@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
    */
   std::vector<std::string> vhltnames;
   start->hltTriggerNames(vhltnames);
-  int hltBitCount = start->get_hlt_bit_cnt();
+  const unsigned int hltBitCount = start->get_hlt_bit_cnt();
 
   std::map<std::string, std::vector<unsigned int> > eventsPerTrigger;
   std::map<std::string, std::vector<unsigned int> > errorsPerTrigger;
