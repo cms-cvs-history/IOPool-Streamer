@@ -7,6 +7,7 @@
 
 #include "IOPool/Streamer/interface/StreamSerializer.h"
 #include "DataFormats/Provenance/interface/BranchDescription.h"
+#include "DataFormats/Provenance/interface/BranchID.h"
 #include "TClass.h"
 #include "IOPool/Streamer/interface/ClassFiller.h"
 #include "IOPool/Streamer/interface/InitMsgBuilder.h"
@@ -133,12 +134,8 @@ namespace edm
 
     for(; i != ie; ++i) {
       BranchDescription const& desc = **i;
-      ProductID const& id = desc.productID();
+      BranchID const& id = desc.branchID();
 
-      if (id == ProductID()) {
-        throw Exception(errors::ProductNotFound,"InvalidID")
-          << "StreamSerializer::serializeEvent: invalid ProductID supplied in productRegistry\n";
-      }
       BasicHandle const bh = eventPrincipal.getForOutput(id, true, true);
       if (bh.provenance() == 0) {
 	// No product with this ID was put in the event.
