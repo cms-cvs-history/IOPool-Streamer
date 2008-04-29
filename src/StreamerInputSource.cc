@@ -329,12 +329,15 @@ namespace edm {
              << " " << spi->desc()->branchID()
              << std::endl;
 
-        std::auto_ptr<EntryDescription>
+        boost::shared_ptr<EntryDescription>
           aedesc(const_cast<EntryDescription*>(spi->prov()));
         std::auto_ptr<BranchDescription>
           adesc(const_cast<BranchDescription*>(spi->desc()));
 
-        std::auto_ptr<Provenance> aprov(new Provenance(*(adesc.get()), *(aedesc.get()), spi->prod() != 0));
+        std::auto_ptr<Provenance> aprov(
+	    new Provenance(*(adesc.get()),
+	    (spi->prod() ? productstatus::present() : productstatus::neverCreated()),
+	     aedesc));
         EntryDescriptionRegistry::instance()->insertMapped(aprov->event());
         if(spi->prod() != 0) {
           std::auto_ptr<EDProduct>
