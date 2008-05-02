@@ -142,7 +142,9 @@ namespace edm
 	// Create and write the provenance.
 	boost::shared_ptr<EntryDescription> entryDescription(new EntryDescription);
 	entryDescription->moduleDescriptionID_ = desc.moduleDescriptionID();
-        dummyProvenances.push_front(Provenance(desc, productstatus::neverCreated(), entryDescription));
+	boost::shared_ptr<BranchEntryInfo> branchEntryInfo(
+	    new BranchEntryInfo(desc.branchID(), desc.productIDtoAssign(), productstatus::neverCreated(), entryDescription));
+        dummyProvenances.push_front(Provenance(desc, branchEntryInfo));
         se.prods_.push_back(ProdPair(0, &*dummyProvenances.begin()));
       } else {
         se.prods_.push_back(ProdPair(bh.wrapper(), bh.provenance()));

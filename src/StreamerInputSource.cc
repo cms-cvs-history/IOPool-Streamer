@@ -9,6 +9,7 @@
 #include "FWCore/Framework/interface/FileBlock.h"
 #include "DataFormats/Provenance/interface/BranchDescription.h"
 #include "DataFormats/Provenance/interface/EntryDescription.h"
+#include "DataFormats/Provenance/interface/BranchEntryInfo.h"
 #include "DataFormats/Provenance/interface/EntryDescriptionRegistry.h"
 #include "DataFormats/Provenance/interface/EventAuxiliary.h"
 #include "DataFormats/Provenance/interface/LuminosityBlockAuxiliary.h"
@@ -329,16 +330,14 @@ namespace edm {
              << " " << spi->desc()->branchID()
              << std::endl;
 
-        boost::shared_ptr<EntryDescription>
-          aedesc(const_cast<EntryDescription*>(spi->prov()));
+        boost::shared_ptr<BranchEntryInfo>
+          aedesc(const_cast<BranchEntryInfo*>(spi->prov()));
         std::auto_ptr<BranchDescription>
           adesc(const_cast<BranchDescription*>(spi->desc()));
 
         std::auto_ptr<Provenance> aprov(
-	    new Provenance(*(adesc.get()),
-	    (spi->prod() ? productstatus::present() : productstatus::neverCreated()),
-	     aedesc));
-        EntryDescriptionRegistry::instance()->insertMapped(aprov->event());
+	    new Provenance(*(adesc.get()), aedesc));
+        // EntryDescriptionRegistry::instance()->insertMapped(aprov->event());
         if(spi->prod() != 0) {
           std::auto_ptr<EDProduct>
             aprod(const_cast<EDProduct*>(spi->prod()));
