@@ -136,7 +136,7 @@ namespace edm
       BranchDescription const& desc = **i;
       BranchID const& id = desc.branchID();
 
-      BasicHandle const bh = eventPrincipal.getForOutput(id, true, true);
+      BasicHandle const bh = eventPrincipal.getForOutput(id, true);
       if (bh.provenance() == 0) {
 	// No product with this ID was put in the event.
 	// Create and write the provenance.
