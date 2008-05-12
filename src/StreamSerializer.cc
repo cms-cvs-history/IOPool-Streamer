@@ -14,7 +14,7 @@
 #include "FWCore/Framework/interface/EventPrincipal.h"
 #include "FWCore/Utilities/interface/WrappedClassName.h"
 #include "DataFormats/Streamer/interface/StreamedProducts.h"
-#include "DataFormats/Common/interface/BasicHandle.h"
+#include "DataFormats/Common/interface/OutputHandle.h"
 
 #include "zlib.h"
 #include <cstdlib>
@@ -136,18 +136,18 @@ namespace edm
       BranchDescription const& desc = **i;
       BranchID const& id = desc.branchID();
 
-      BasicHandle const bh = eventPrincipal.getForOutput(id, true);
-      if (bh.provenance() == 0) {
+      OutputHandle<EventEntryInfo> const oh = eventPrincipal.getForOutput(id, true);
+      if (!oh.entryInfo()) {
 	// No product with this ID was put in the event.
 	// Create and write the provenance.
 	boost::shared_ptr<EntryDescription> entryDescription(new EntryDescription);
 	entryDescription->moduleDescriptionID_ = desc.moduleDescriptionID();
-	boost::shared_ptr<BranchEntryInfo> branchEntryInfo(
-	    new BranchEntryInfo(desc.branchID(), desc.productIDtoAssign(), productstatus::neverCreated(), entryDescription));
+	boost::shared_ptr<EventEntryInfo> branchEntryInfo(
+	    new EventEntryInfo(desc.branchID(), productstatus::neverCreated(), desc.productIDtoAssign(), entryDescription));
         dummyProvenances.push_front(Provenance(desc, branchEntryInfo));
         se.prods_.push_back(ProdPair(0, &*dummyProvenances.begin()));
       } else {
-        se.prods_.push_back(ProdPair(bh.wrapper(), bh.provenance()));
+        se.prods_.push_back(ProdPair(oh.wrapper(), new Provenance(*oh.desc(), oh.entryInfoSharedPtr())));
       }
     }
 

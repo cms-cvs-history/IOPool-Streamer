@@ -9,7 +9,7 @@
 #include "FWCore/Framework/interface/FileBlock.h"
 #include "DataFormats/Provenance/interface/BranchDescription.h"
 #include "DataFormats/Provenance/interface/EntryDescription.h"
-#include "DataFormats/Provenance/interface/BranchEntryInfo.h"
+#include "DataFormats/Provenance/interface/EventEntryInfo.h"
 #include "DataFormats/Provenance/interface/EntryDescriptionRegistry.h"
 #include "DataFormats/Provenance/interface/EventAuxiliary.h"
 #include "DataFormats/Provenance/interface/LuminosityBlockAuxiliary.h"
@@ -330,8 +330,8 @@ namespace edm {
              << " " << spi->desc()->branchID()
              << std::endl;
 
-        boost::shared_ptr<BranchEntryInfo>
-          aedesc(const_cast<BranchEntryInfo*>(spi->prov()));
+        boost::shared_ptr<EventEntryInfo>
+          aedesc(const_cast<EventEntryInfo*>(spi->prov()));
         std::auto_ptr<BranchDescription>
           adesc(const_cast<BranchDescription*>(spi->desc()));
 
@@ -342,11 +342,11 @@ namespace edm {
           std::auto_ptr<EDProduct>
             aprod(const_cast<EDProduct*>(spi->prod()));
           FDEBUG(10) << "addgroup next " << aprov->productID() << std::endl;
-          ep->addGroup(aprod, aprov);
+          ep->addGroup(aprod, aprov->constBranchDescription(), aprov->branchEntryInfoSharedPtr());
           FDEBUG(10) << "addgroup done" << std::endl;
         } else {
           FDEBUG(10) << "addgroup empty next " << aprov->productID() << std::endl;
-          ep->addGroup(aprov);
+          ep->addGroup(aprov->constBranchDescription(), aprov->branchEntryInfoSharedPtr());
           FDEBUG(10) << "addgroup empty done" << std::endl;
         }
         spi->clear();
