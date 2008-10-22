@@ -6,6 +6,7 @@
 
   <bin file=EventMessageTest.cpp></bin>
   <bin file=ReadStreamerFile.cpp></bin>
+  <bin file=CalcAdler32.cpp></bin>
   <bin file=WriteStreamerFile.cpp></bin>
   <bin file=TestOtherMessage.cpp></bin>
   <bin file=WriteDQMToFile.cpp></bin>
