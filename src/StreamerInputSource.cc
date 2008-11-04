@@ -66,7 +66,7 @@ namespace edm {
   // ---------------------------------------
   boost::shared_ptr<FileBlock>
   StreamerInputSource::readFile_() {
-    productRegistryUpdate().setProductIDs(productRegistry()->nextID());
+    productRegistryUpdate().setProductIDs();
     return boost::shared_ptr<FileBlock>(new FileBlock);
   }
 
@@ -101,7 +101,6 @@ namespace edm {
 	FDEBUG(6) << "StreamInput prod = " << i->className() << std::endl;
       }
     }
-    reg.setNextID(header.nextID());
   }
 
   void
@@ -329,15 +328,15 @@ namespace edm {
       newLumi_ = true;
     }
 
+    boost::shared_ptr<History> history (new History(sd->history()));
     std::auto_ptr<EventPrincipal> ep(new EventPrincipal(sd->aux(),
                                                    productRegistry(),
                                                    processConfiguration(),
-                                                   sd->processHistory().id()));
+                                                   history));
     productGetter_.setEventPrincipal(ep.get());
 
     // no process name list handling
 
-    ProductID largestID;
     SendProds & sps = sd->products();
     for(SendProds::iterator spi = sps.begin(), spe = sps.end(); spi != spe; ++spi) {
         FDEBUG(10) << "check prodpair" << std::endl;
@@ -359,9 +358,6 @@ namespace edm {
 				*spi->parents()));
 
 	ep->branchMapperPtr()->insert(*eventEntryDesc);
-	if(spi->productID() > largestID) {
-	   largestID = spi->productID();
-	}
         if(spi->prod() != 0) {
           std::auto_ptr<EDProduct> aprod(const_cast<EDProduct*>(spi->prod()));
           FDEBUG(10) << "addgroup next " << spi->branchID() << std::endl;
@@ -375,21 +371,6 @@ namespace edm {
         spi->clear();
     }
 
-    if(largestID.id() >= productRegistry()->nextID()) {
-       edm::LogError("MetaDataError")<<"The input file has a critical problem, the 'nextID' for the ProductRegistry ("
-				     <<productRegistry()->nextID()
-				     <<")\n is less than the largest ProductID ("
-				     <<largestID.id()
-				     <<") used in a previous process.\n"
-	  " Will modify the ProductRegistry to attempt to correct the problem,\n"
-	  " although it is possible that edm::Ref*'s or edm::Ptr's may still fail.\n"
-	  " Please contact StreamerOutputModule developers.";
-       //NOTE: this works since only EDProducers get their ProductIDs for the event from
-       // the ProductRegistry and they do not do that until they 'put' their data
-       // so at this point no one has tried to use the ProductIDs yet
-       productRegistryUpdate().setNextID(largestID.id()+1);
-       productRegistryUpdate().setProductIDs(largestID.id()+1);
-    }
     FDEBUG(10) << "Size = " << ep->size() << std::endl;
 
     return ep;     

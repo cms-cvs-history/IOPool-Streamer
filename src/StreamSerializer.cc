@@ -61,7 +61,6 @@ namespace edm
                   << std::endl;
     }
     edm::Service<edm::ConstProductRegistry> reg;
-    sd.setNextID(reg->nextID());
     sd.setModuleDescriptionMap(ModuleDescriptionRegistry::instance()->data());
     SendJobHeader::ParameterSetMap psetMap;
 
@@ -131,13 +130,17 @@ namespace edm
 
    */
   int StreamSerializer::serializeEvent(EventPrincipal const& eventPrincipal,
+                                       ParameterSetID const& selectorConfig,
                                        bool use_compression, int compression_level,
                                        SerializeDataBuffer &data_buffer)
 
   {
     EventEntryDescription entryDesc;
     
-    SendEvent se(eventPrincipal.aux(), eventPrincipal.processHistory());
+	
+    History historyForOutput(eventPrincipal.history());
+    historyForOutput.addEntry(selectorConfig);
+    SendEvent se(eventPrincipal.aux(), eventPrincipal.processHistory(), historyForOutput);
 
     Selections::const_iterator i(selections_->begin()),ie(selections_->end());
     // Loop over EDProducts, fill the provenance, and write.
