@@ -27,6 +27,8 @@
 #include "FWCore/ParameterSet/interface/Registry.h"
 #include "FWCore/Utilities/interface/ThreadSafeRegistry.h"
 
+#include "DataFormats/Provenance/interface/ModuleDescriptionRegistry.h"
+#include "DataFormats/Provenance/interface/BranchIDListRegistry.h"
 #include "DataFormats/Provenance/interface/ProductRegistry.h"
 #include "DataFormats/Provenance/interface/ProcessHistoryRegistry.h"
 #include "FWCore/Utilities/interface/DebugMacros.h"
@@ -66,7 +68,6 @@ namespace edm {
   // ---------------------------------------
   boost::shared_ptr<FileBlock>
   StreamerInputSource::readFile_() {
-    productRegistryUpdate().setProductIDs();
     return boost::shared_ptr<FileBlock>(new FileBlock);
   }
 
@@ -136,7 +137,7 @@ namespace edm {
     header->hltTriggerNames(paths);
     trigger_pset.addParameter<Strings>("@trigger_paths", paths);
     pset::Registry* psetRegistry = pset::Registry::instance();
-    psetRegistry->insertMapped(trigger_pset);
+    psetRegistry->registryPut(trigger_pset);
   }
 
   boost::shared_ptr<RunPrincipal>
@@ -240,14 +241,19 @@ namespace edm {
      std::auto_ptr<SendJobHeader> sd = deserializeRegistry(initView);
      mergeIntoRegistry(*sd, productRegistryUpdate(), subsequent);
      ModuleDescriptionRegistry & moduleDescriptionRegistry = *ModuleDescriptionRegistry::instance();
-     ModuleDescriptionMap const& mdMap = sd->moduleDescriptionMap();
-     for (ModuleDescriptionMap::const_iterator k = mdMap.begin(), kEnd = mdMap.end(); k != kEnd; ++k) {
-       moduleDescriptionRegistry.insertMapped(k->second);
+     ModuleDescriptionRegistry::collection_type const& mdMap = sd->moduleDescriptionMap();
+     for (ModuleDescriptionRegistry::const_iterator k = mdMap.begin(), kEnd = mdMap.end(); k != kEnd; ++k) {
+       moduleDescriptionRegistry.registryPut(k->second);
+     } 
+     BranchIDListRegistry & branchIDListRegistry = *BranchIDListRegistry::instance();
+     BranchIDListRegistry::collection_type const& bidlist = sd->branchIDLists();
+     for (BranchIDListRegistry::const_iterator k = bidlist.begin(), kEnd = bidlist.end(); k != kEnd; ++k) {
+       branchIDListRegistry.registryPut(*k);
      } 
      SendJobHeader::ParameterSetMap const & psetMap = sd->processParameterSet();
      pset::Registry& psetRegistry = *pset::Registry::instance();
      for (SendJobHeader::ParameterSetMap::const_iterator i = psetMap.begin(), iEnd = psetMap.end(); i != iEnd; ++i) {
-       psetRegistry.insertMapped(ParameterSet(i->second.pset_));
+       psetRegistry.registryPut(ParameterSet(i->second.pset_));
      }
   }
 
@@ -306,7 +312,7 @@ namespace edm {
           << "got a null event from input stream\n";
     }
     sd->processHistory().setDefaultTransients();
-    ProcessHistoryRegistry::instance()->insertMapped(sd->processHistory());
+    ProcessHistoryRegistry::instance()->registryPut(sd->processHistory());
 
     FDEBUG(5) << "Got event: " << sd->aux().id() << " " << sd->products().size() << std::endl;
     if(!runPrincipal() || runPrincipal()->run() != sd->aux().run()) {

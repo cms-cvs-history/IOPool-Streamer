@@ -11,6 +11,7 @@
 #include "DataFormats/Provenance/interface/EventEntryDescription.h"
 #include "DataFormats/Provenance/interface/EventEntryInfo.h"
 #include "DataFormats/Provenance/interface/ModuleDescriptionRegistry.h"
+#include "DataFormats/Provenance/interface/BranchIDListRegistry.h"
 #include "TClass.h"
 #include "IOPool/Streamer/interface/ClassFiller.h"
 #include "IOPool/Streamer/interface/InitMsgBuilder.h"
@@ -62,6 +63,7 @@ namespace edm
     }
     edm::Service<edm::ConstProductRegistry> reg;
     sd.setModuleDescriptionMap(ModuleDescriptionRegistry::instance()->data());
+    sd.setBranchIDLists(BranchIDListRegistry::instance()->data());
     SendJobHeader::ParameterSetMap psetMap;
 
     pset::Registry const* psetRegistry = pset::Registry::instance();
@@ -155,7 +157,7 @@ namespace edm
 	// Create and write the provenance.
         se.products().push_back(StreamedProduct(desc));
       } else {
-        bool found = EntryDescriptionRegistry::instance()->getMapped(oh.entryInfoSharedPtr()->entryDescriptionID(), entryDesc);
+        bool found = EntryDescriptionRegistry::instance()->registryGet(oh.entryInfoSharedPtr()->entryDescriptionID(), entryDesc);
 	assert (found);
         se.products().push_back(StreamedProduct(oh.wrapper(),
 					       desc,
