@@ -137,7 +137,7 @@ namespace edm {
     header->hltTriggerNames(paths);
     trigger_pset.addParameter<Strings>("@trigger_paths", paths);
     pset::Registry* psetRegistry = pset::Registry::instance();
-    psetRegistry->registryPut(trigger_pset);
+    psetRegistry->insertMapped(trigger_pset);
   }
 
   boost::shared_ptr<RunPrincipal>
@@ -243,17 +243,17 @@ namespace edm {
      ModuleDescriptionRegistry & moduleDescriptionRegistry = *ModuleDescriptionRegistry::instance();
      ModuleDescriptionRegistry::collection_type const& mdMap = sd->moduleDescriptionMap();
      for (ModuleDescriptionRegistry::const_iterator k = mdMap.begin(), kEnd = mdMap.end(); k != kEnd; ++k) {
-       moduleDescriptionRegistry.registryPut(k->second);
+       moduleDescriptionRegistry.insertMapped(k->second);
      } 
      BranchIDListRegistry & branchIDListRegistry = *BranchIDListRegistry::instance();
      BranchIDListRegistry::collection_type const& bidlist = sd->branchIDLists();
      for (BranchIDListRegistry::const_iterator k = bidlist.begin(), kEnd = bidlist.end(); k != kEnd; ++k) {
-       branchIDListRegistry.registryPut(*k);
+       branchIDListRegistry.insertMapped(*k);
      } 
      SendJobHeader::ParameterSetMap const & psetMap = sd->processParameterSet();
      pset::Registry& psetRegistry = *pset::Registry::instance();
      for (SendJobHeader::ParameterSetMap::const_iterator i = psetMap.begin(), iEnd = psetMap.end(); i != iEnd; ++i) {
-       psetRegistry.registryPut(ParameterSet(i->second.pset_));
+       psetRegistry.insertMapped(ParameterSet(i->second.pset_));
      }
   }
 
@@ -312,7 +312,7 @@ namespace edm {
           << "got a null event from input stream\n";
     }
     sd->processHistory().setDefaultTransients();
-    ProcessHistoryRegistry::instance()->registryPut(sd->processHistory());
+    ProcessHistoryRegistry::instance()->insertMapped(sd->processHistory());
 
     FDEBUG(5) << "Got event: " << sd->aux().id() << " " << sd->products().size() << std::endl;
     if(!runPrincipal() || runPrincipal()->run() != sd->aux().run()) {

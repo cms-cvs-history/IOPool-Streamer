@@ -157,7 +157,7 @@ namespace edm
 	// Create and write the provenance.
         se.products().push_back(StreamedProduct(desc));
       } else {
-        bool found = EntryDescriptionRegistry::instance()->registryGet(oh.entryInfoSharedPtr()->entryDescriptionID(), entryDesc);
+        bool found = EntryDescriptionRegistry::instance()->getMapped(oh.entryInfoSharedPtr()->entryDescriptionID(), entryDesc);
 	assert (found);
         se.products().push_back(StreamedProduct(oh.wrapper(),
 					       desc,
