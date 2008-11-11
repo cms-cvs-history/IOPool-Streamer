@@ -19,7 +19,7 @@
 
       Code entry point, comment the function call that you don't want to make.
 
- $Id$
+ $Id: DiagStreamerFile.cpp,v 1.1 2008/10/31 23:44:18 hcheung Exp $
 
 */
 
@@ -79,9 +79,11 @@ void readfile(std::string filename, std::string outfile) {
   int num_badevents(0);
   int num_baduncompress(0);
   int num_goodevents(0);
+  int num_duplevents(0);
   uint32 hltcount(0);
   std::vector<uint32> hltStats(0);
   std::vector<unsigned char> compress_buffer(7000000);
+  std::map<uint32, uint32> seenEventMap;
   bool output(false);
   if(outfile != "/dev/null") {
     output = true;
@@ -112,11 +114,21 @@ void readfile(std::string filename, std::string outfile) {
     bool first_event(true);
     EventMsgView* firstEvtView(0);
     const EventMsgView* eview(0);
+    seenEventMap.clear();
   
     while(stream_reader.next()) {
       eview = stream_reader.currentRecord();
       ++num_events;
       bool good_event(true);
+      if(seenEventMap.find(eview->event()) == seenEventMap.end()) {
+         seenEventMap.insert(std::make_pair(eview->event(), 1));
+      } else {
+         ++seenEventMap[eview->event()];
+         ++num_duplevents;
+         std::cout << "??????? duplicate event Id for count " << num_events
+                    << " event number " << eview->event()
+                    << " seen " << seenEventMap[eview->event()] << " times" << std::endl;
+      }
       if(first_event) {
         std::cout<<"----------dumping first EVENT-----------"<< std::endl;
         dumpEventView(eview);
@@ -169,7 +181,8 @@ void readfile(std::string filename, std::string outfile) {
     std::cout << std::endl << "------------END--------------" << std::endl
               << "read " << num_events << " events" << std::endl
               << "and " << num_badevents << " events with bad headers" << std::endl
-              << "and " << num_baduncompress << " events with bad uncompress" << std::endl;
+              << "and " << num_baduncompress << " events with bad uncompress" << std::endl
+              << "and " << num_duplevents << " duplicated event Id" << std::endl;
     if(output) {
       uint32 dummyStatusCode = 1234;
       stream_output.writeEOF(dummyStatusCode, hltStats);
@@ -181,7 +194,8 @@ void readfile(std::string filename, std::string outfile) {
                << e.what() << std::endl
                << "After reading " << num_events << " events, and "
                << num_badevents << " events with bad headers" << std::endl
-               << "and " << num_baduncompress << " events with bad uncompress" << std::endl;
+               << "and " << num_baduncompress << " events with bad uncompress"  << std::endl
+               << "and " << num_duplevents << " duplicated event Id" << std::endl;
   }
 }
 
