@@ -133,7 +133,13 @@ void readfile(std::string filename, std::string outfile) {
         std::cout<<"----------dumping first EVENT-----------"<< std::endl;
         dumpEventView(eview);
         first_event = false;
-        firstEvtView = new EventMsgView((void*)eview->startAddress());
+        std::vector<unsigned char> *savebuf(new std::vector<unsigned char>(0));
+        unsigned char* src = (unsigned char*)eview->startAddress();
+        unsigned int srcSize = eview->size();
+        savebuf->resize(srcSize);
+        std::copy(src, src+srcSize, &(*savebuf)[0]);
+        firstEvtView = new EventMsgView(&(*savebuf)[0]);
+        //firstEvtView = new EventMsgView((void*)eview->startAddress());
         if(!test_uncompress(firstEvtView, compress_buffer)) {
           std::cout << "uncompress error for count " << num_events 
                     << " event number " << firstEvtView->event() << std::endl;
@@ -207,27 +213,27 @@ bool compares_bad(const EventMsgView* eview1, const EventMsgView* eview2) {
     is_bad = true;
   }
   if(eview1->protocolVersion() != eview2->protocolVersion()) {
-    std::cout << "non-matching EVENT message code " << std::endl;
+    std::cout << "non-matching EVENT message protocol version" << std::endl;
     is_bad = true;
   }
   if(eview1->run() != eview2->run()) {
-    std::cout << "non-matching EVENT message code " << std::endl;
+    std::cout << "non-matching run number " << std::endl;
     is_bad = true;
   }
   if(eview1->lumi() != eview2->lumi()) {
-    std::cout << "non-matching EVENT message code " << std::endl;
+    std::cout << "non-matching lumi number" << std::endl;
     is_bad = true;
   }
   if(eview1->outModId() != eview2->outModId()) {
-    std::cout << "non-matching EVENT message code " << std::endl;
+    std::cout << "non-matching output module id" << std::endl;
     is_bad = true;
   }
   if(eview1->hltCount() != eview2->hltCount()) {
-    std::cout << "non-matching EVENT message code " << std::endl;
+    std::cout << "non-matching HLT count" << std::endl;
     is_bad = true;
   }
   if(eview1->l1Count() != eview2->l1Count()) {
-    std::cout << "non-matching EVENT message code " << std::endl;
+    std::cout << "non-matching L1 count" << std::endl;
     is_bad = true;
   }
   return is_bad;
