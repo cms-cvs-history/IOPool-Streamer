@@ -9,7 +9,7 @@
 #include "FWCore/Framework/interface/FileBlock.h"
 #include "DataFormats/Provenance/interface/BranchDescription.h"
 #include "DataFormats/Provenance/interface/EventEntryDescription.h"
-#include "DataFormats/Provenance/interface/EventEntryInfo.h"
+#include "DataFormats/Provenance/interface/ProductProvenance.h"
 #include "DataFormats/Provenance/interface/EntryDescriptionRegistry.h"
 #include "DataFormats/Provenance/interface/EventAuxiliary.h"
 #include "DataFormats/Provenance/interface/LuminosityBlockAuxiliary.h"
@@ -355,12 +355,11 @@ namespace edm {
              << std::endl;
 
 	ConstBranchDescription branchDesc(*spi->desc());
-	// This EventEntryInfo constructor inserts into the entry description registry
-        boost::shared_ptr<EventEntryInfo> eventEntryDesc(
-	     new EventEntryInfo(spi->branchID(),
+	// This ProductProvenance constructor inserts into the entry description registry
+        boost::shared_ptr<ProductProvenance> eventEntryDesc(
+	     new ProductProvenance(spi->branchID(),
 				spi->status(),
 				spi->mod(),
-				spi->productID(),
 				*spi->parents()));
 
 	ep->branchMapperPtr()->insert(*eventEntryDesc);

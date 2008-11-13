@@ -9,7 +9,7 @@
 #include "DataFormats/Provenance/interface/BranchID.h"
 #include "DataFormats/Provenance/interface/EntryDescriptionRegistry.h"
 #include "DataFormats/Provenance/interface/EventEntryDescription.h"
-#include "DataFormats/Provenance/interface/EventEntryInfo.h"
+#include "DataFormats/Provenance/interface/ProductProvenance.h"
 #include "DataFormats/Provenance/interface/ModuleDescriptionRegistry.h"
 #include "DataFormats/Provenance/interface/BranchIDListRegistry.h"
 #include "TClass.h"
@@ -151,19 +151,18 @@ namespace edm
       BranchDescription const& desc = **i;
       BranchID const& id = desc.branchID();
 
-      OutputHandle<EventEntryInfo> const oh = eventPrincipal.getForOutput<EventEntryInfo>(id, true);
-      if (!oh.entryInfo()) {
+      OutputHandle<ProductProvenance> const oh = eventPrincipal.getForOutput<ProductProvenance>(id, true);
+      if (!oh.productProvenance()) {
 	// No product with this ID was put in the event.
 	// Create and write the provenance.
         se.products().push_back(StreamedProduct(desc));
       } else {
-        bool found = EntryDescriptionRegistry::instance()->getMapped(oh.entryInfoSharedPtr()->entryDescriptionID(), entryDesc);
+        bool found = EntryDescriptionRegistry::instance()->getMapped(oh.productProvenanceSharedPtr()->entryDescriptionID(), entryDesc);
 	assert (found);
         se.products().push_back(StreamedProduct(oh.wrapper(),
 					       desc,
 					       entryDesc.moduleDescriptionID(),
-					       oh.entryInfoSharedPtr()->productID(),
-					       oh.entryInfoSharedPtr()->productStatus(),
+					       oh.productProvenanceSharedPtr()->productStatus(),
 					       &entryDesc.parents()));
       }
     }
