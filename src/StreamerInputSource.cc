@@ -240,16 +240,8 @@ namespace edm {
   {
      std::auto_ptr<SendJobHeader> sd = deserializeRegistry(initView);
      mergeIntoRegistry(*sd, productRegistryUpdate(), subsequent);
-     ModuleDescriptionRegistry & moduleDescriptionRegistry = *ModuleDescriptionRegistry::instance();
-     ModuleDescriptionRegistry::collection_type const& mdMap = sd->moduleDescriptionMap();
-     for (ModuleDescriptionRegistry::const_iterator k = mdMap.begin(), kEnd = mdMap.end(); k != kEnd; ++k) {
-       moduleDescriptionRegistry.insertMapped(k->second);
-     } 
-     BranchIDListRegistry & branchIDListRegistry = *BranchIDListRegistry::instance();
-     BranchIDListRegistry::collection_type const& bidlist = sd->branchIDLists();
-     for (BranchIDListRegistry::const_iterator k = bidlist.begin(), kEnd = bidlist.end(); k != kEnd; ++k) {
-       branchIDListRegistry.insertMapped(*k);
-     } 
+     ModuleDescriptionRegistry::instance()->insertCollection(sd->moduleDescriptionMap());
+     BranchIDListRegistry::instance()->insertCollection(sd->branchIDLists());
      SendJobHeader::ParameterSetMap const & psetMap = sd->processParameterSet();
      pset::Registry& psetRegistry = *pset::Registry::instance();
      for (SendJobHeader::ParameterSetMap::const_iterator i = psetMap.begin(), iEnd = psetMap.end(); i != iEnd; ++i) {
