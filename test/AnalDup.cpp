@@ -19,7 +19,7 @@
 
       Code entry point, comment the function call that you don't want to make.
 
- $Id: DiagStreamerFile.cpp,v 1.3 2008/11/12 10:31:29 hcheung Exp $
+ $Id: AnalDup.cpp,v 1.1 2008/11/12 17:01:15 hcheung Exp $
 
 */
 
@@ -41,9 +41,11 @@ bool uncompressBuffer(unsigned char *inputBuffer,
                               std::vector<unsigned char> &outputBuffer,
                               unsigned int expectedFullSize);
 bool test_uncompress(const EventMsgView* eview, std::vector<unsigned char> &dest);
-void readfile(std::string filename, std::string outfile);
+void readfile(std::string filename, std::map<uint32, uint32> &dupEventMap);
+void studyDupInFile(std::string filename, std::map<uint32, uint32> &dupEventMap);
+bool sameEvtHeader(const EventMsgView* eview1, const EventMsgView* eview2);
+unsigned int compEvtDataBlob(const EventMsgView* eview1, const EventMsgView* eview2);
 void help();
-void updateHLTStats(std::vector<uint8> const& packedHlt, uint32 hltcount, std::vector<uint32> &hltStats);
 
 //==========================================================================
 int main(int argc, char* argv[]){
@@ -55,44 +57,36 @@ int main(int argc, char* argv[]){
   }
 
   std::string streamfile(argv[1]);
-  std::string outfile("/dev/null");
+  std::string outdump("none");
   if(argc == 3) {
-    outfile = argv[2];
+    outdump = argv[2];
   }
 
-  readfile(streamfile, outfile);
-  std::cout <<"\n\nDiagStreamerFile TEST DONE\n"<< std::endl;
+  std::map<uint32, uint32> dupEventMap;
+  dupEventMap.clear();
+  readfile(streamfile, dupEventMap);
+  if(!dupEventMap.empty()) studyDupInFile(streamfile, dupEventMap);
+  std::cout <<"\n\nAnalDup TEST DONE\n"<< std::endl;
 
   return 0;
 }
 
 //==========================================================================
 void help() {
-      std::cout << "Usage: DiagStreamerFile streamer_file_name" 
-                << " [output_file_name]" << std::endl;
+      std::cout << "Usage: AnalDup streamer_file_name" << std::endl;
 }
 
 //==========================================================================
-void readfile(std::string filename, std::string outfile) {
+void readfile(std::string filename, std::map<uint32, uint32> &dupEventMap) {
 
   int num_events(0);
   int num_badevents(0);
   int num_baduncompress(0);
-  int num_goodevents(0);
   int num_duplevents(0);
-  uint32 hltcount(0);
-  std::vector<uint32> hltStats(0);
   std::vector<unsigned char> compress_buffer(7000000);
-  std::map<uint32, uint32> seenEventMap;
-  bool output(false);
-  if(outfile != "/dev/null") {
-    output = true;
-  }
-  StreamerOutputFile stream_output(outfile);
   try{
     // ----------- init
     StreamerInputFile stream_reader (filename);
-    //if(output) StreamerOutputFile stream_output(outfile);
 
     std::cout << "Trying to Read The Init message from Streamer File: " << std::endl
          << filename << std::endl;
@@ -100,13 +94,6 @@ void readfile(std::string filename, std::string outfile) {
     std::cout<<"\n\n-------------INIT Message---------------------"<< std::endl;
     std::cout<<"Dump the Init Message from Streamer:-"<< std::endl;
     dumpInitView(init);
-    if(output) {
-      stream_output.write(*init);
-      hltcount = init->get_hlt_bit_cnt();
-      //Initialize the HLT Stat vector with all ZEROs
-      for(uint32 i = 0; i != hltcount; ++i)
-        hltStats.push_back(0);
-    }
 
     // ------- event
     std::cout<<"\n\n-------------EVENT Messages-------------------"<< std::endl;
@@ -114,6 +101,7 @@ void readfile(std::string filename, std::string outfile) {
     bool first_event(true);
     EventMsgView* firstEvtView(0);
     const EventMsgView* eview(0);
+    std::map<uint32, uint32> seenEventMap;
     seenEventMap.clear();
   
     while(stream_reader.next()) {
@@ -125,9 +113,16 @@ void readfile(std::string filename, std::string outfile) {
       } else {
          ++seenEventMap[eview->event()];
          ++num_duplevents;
+         if(dupEventMap.find(eview->event()) == dupEventMap.end()) {
+           dupEventMap.insert(std::make_pair(eview->event(), 2));
+         } else {
+           ++dupEventMap[eview->event()];
+         }
          std::cout << "??????? duplicate event Id for count " << num_events
                     << " event number " << eview->event()
                     << " seen " << seenEventMap[eview->event()] << " times" << std::endl;
+          std::cout<<"----------dumping duplicated EVENT-----------"<< std::endl;
+          dumpEventView(eview);
       }
       if(first_event) {
         std::cout<<"----------dumping first EVENT-----------"<< std::endl;
@@ -140,6 +135,8 @@ void readfile(std::string filename, std::string outfile) {
         std::copy(src, src+srcSize, &(*savebuf)[0]);
         firstEvtView = new EventMsgView(&(*savebuf)[0]);
         //firstEvtView = new EventMsgView((void*)eview->startAddress());
+        //std::cout<<"----------dumping copied first EVENT-----------"<< std::endl;
+        //dumpEventView(firstEvtView);
         if(!test_uncompress(firstEvtView, compress_buffer)) {
           std::cout << "uncompress error for count " << num_events 
                     << " event number " << firstEvtView->event() << std::endl;
@@ -165,22 +162,10 @@ void readfile(std::string filename, std::string outfile) {
           good_event=false;
         }
       }
-      if(output && good_event) {
-        ++num_goodevents;
-        stream_output.write(*eview);
-        //get the HLT Packed bytes
-        std::vector<uint8> packedHlt;
-        uint32 hlt_sz = 0;
-        if (hltcount != 0) hlt_sz = 1 + ((hltcount-1)/4); 
-        packedHlt.resize(hlt_sz);
-        firstEvtView->hltTriggerBits(&packedHlt[0]);
-        updateHLTStats(packedHlt, hltcount, hltStats);
-      }
       if((num_events % 1000) == 0) {
         std::cout << "Read " << num_events << " events, and "
                   << num_badevents << " events with bad headers, and "
                   << num_baduncompress << " events with bad uncompress" << std::endl;
-        if(output) std::cout << "Wrote " << num_goodevents << " good events " << std::endl;
       }
     }
     delete firstEvtView;
@@ -189,11 +174,6 @@ void readfile(std::string filename, std::string outfile) {
               << "and " << num_badevents << " events with bad headers" << std::endl
               << "and " << num_baduncompress << " events with bad uncompress" << std::endl
               << "and " << num_duplevents << " duplicated event Id" << std::endl;
-    if(output) {
-      uint32 dummyStatusCode = 1234;
-      stream_output.writeEOF(dummyStatusCode, hltStats);
-      std::cout << "Wrote " << num_goodevents << " good events " << std::endl;
-    }
 
   }catch (cms::Exception& e){
      std::cerr << "Exception caught:  "
@@ -215,15 +195,15 @@ bool compares_bad(const EventMsgView* eview1, const EventMsgView* eview2) {
   if(eview1->protocolVersion() != eview2->protocolVersion()) {
     std::cout << "non-matching EVENT message protocol version" << std::endl;
     is_bad = true;
-  }
+  } 
   if(eview1->run() != eview2->run()) {
     std::cout << "non-matching run number " << std::endl;
     is_bad = true;
-  }
+  } 
   if(eview1->lumi() != eview2->lumi()) {
     std::cout << "non-matching lumi number" << std::endl;
     is_bad = true;
-  }
+  } 
   if(eview1->outModId() != eview2->outModId()) {
     std::cout << "non-matching output module id" << std::endl;
     is_bad = true;
@@ -280,19 +260,184 @@ bool uncompressBuffer(unsigned char *inputBuffer,
     }
     return true;
 }
-
 //==========================================================================
-void updateHLTStats(std::vector<uint8> const& packedHlt, uint32 hltcount, std::vector<uint32> &hltStats)
-{
-  unsigned int packInOneByte = 4;
-  unsigned char testAgaint = 0x01;
-  for(unsigned int i = 0; i != hltcount; ++i)
-  {
-    unsigned int whichByte = i/packInOneByte;
-    unsigned int indxWithinByte = i % packInOneByte;
-    if ((testAgaint << (2 * indxWithinByte)) & (packedHlt.at(whichByte))) {
-        ++hltStats[i];
+void studyDupInFile(std::string filename, std::map<uint32, uint32> &dupEventMap) {
+
+  int num_events(0);
+  std::map<uint32, EventMsgView*> dupEventDataMap;
+  std::vector<unsigned char> compress_buffer(7000000);
+  try{
+    // ----------- init
+    StreamerInputFile stream_reader (filename);
+
+    std::cout << std::endl << "Trying to Study duplicate events in Streamer File: " << std::endl
+         << filename << std::endl;
+    //const InitMsgView* init = stream_reader.startMessage();
+    //std::cout<<"\n\n-------------INIT Message---------------------"<< std::endl;
+    //std::cout<<"Dump the Init Message from Streamer:-"<< std::endl;
+    //dumpInitView(init);
+
+    // ------- event
+    std::cout<<"\n\n-------------EVENT Messages-------------------"<< std::endl;
+
+    const EventMsgView* eview(0);
+  
+    std::cout << "Number duplicated events = " << dupEventMap.size() << std::endl;
+    while(stream_reader.next()) {
+      eview = stream_reader.currentRecord();
+      ++num_events;
+      if(dupEventMap.find(eview->event()) != dupEventMap.end()) {
+        // this event was duplicated
+        if(dupEventDataMap.find(eview->event()) == dupEventDataMap.end()) {
+          // first instance of this duplicated event - save it
+          std::cout << "Saving duplicate event at count " << num_events
+                    << " event number " << eview->event()
+                    << " seen " << dupEventMap[eview->event()] << " times" << std::endl;
+          //std::cout<<"----------dumping EVENT-----------"<< std::endl;
+          //dumpEventView(eview);
+          std::vector<unsigned char> *savebuf(new std::vector<unsigned char>(0));
+          unsigned char* src = (unsigned char*)eview->startAddress();
+          unsigned int srcSize = eview->size();
+          savebuf->resize(srcSize);
+          std::copy(src, src+srcSize, &(*savebuf)[0]);
+          EventMsgView* saveEvtView(0);
+          saveEvtView = new EventMsgView(&(*savebuf)[0]);
+          //std::cout<<"----------dumping saved EVENT-----------"<< std::endl;
+          //dumpEventView(saveEvtView);
+          dupEventDataMap.insert(std::make_pair(eview->event(), saveEvtView));
+        } else {
+          // next instance of duplicated event test it
+          std::cout << "Testing duplicate event at count " << num_events
+                    << " event number " << eview->event()
+                    << " seen " << dupEventMap[eview->event()] << " times" << std::endl;
+          //std::cout<<"----------dumping EVENT-----------"<< std::endl;
+          //dumpEventView(eview);
+          if(sameEvtHeader(eview, dupEventDataMap[eview->event()])) {
+            // header is the same look at data blob
+            std::cout << "Duplicate event has same header checking data blob" << std::endl;
+            unsigned int bytesDiff = compEvtDataBlob(eview, dupEventDataMap[eview->event()]);
+            if(bytesDiff == 0) {
+              // data blob is the same
+              std::cout << "Duplicate event has same data blob" << std::endl;
+            } else {
+              // data blob is different
+              std::cout << "Duplicate event data blob has " << bytesDiff << " bytes difference" << std::endl;
+            }
+          } else {
+            std::cout << "Duplicate event has different header" << std::endl;
+          }
+        }
+       }
+      if((num_events % 1000) == 0) {
+        std::cout << "Read " << num_events << " events" << std::endl;
+      }
     }
+    std::cout << std::endl << "------------END--------------" << std::endl
+              << "read " << num_events << " events" << std::endl;
+  }catch (cms::Exception& e){
+     std::cerr << "Exception caught:  "
+               << e.what() << std::endl
+               << "After reading " << num_events << " events" << std::endl;
   }
 }
 
+//==========================================================================
+bool sameEvtHeader(const EventMsgView* eview1, const EventMsgView* eview2) {
+  bool is_same(true);
+  if(eview1->code() != eview2->code()) {
+    std::cout << "non-matching EVENT message code " << std::endl;
+    is_same = false;
+  }
+  if(eview1->size() != eview2->size()) {
+    std::cout << "non-matching EVENT message size " << std::endl;
+    is_same = false;
+  }
+  if(eview1->eventLength() != eview2->eventLength()) {
+    std::cout << "non-matching EVENT message data length" << std::endl;
+    is_same = false;
+  }
+  if(eview1->headerSize() != eview2->headerSize()) {
+    std::cout << "non-matching EVENT message header size " << std::endl;
+    is_same = false;
+  }
+  if(eview1->protocolVersion() != eview2->protocolVersion()) {
+    std::cout << "non-matching EVENT message protocol version" << std::endl;
+    is_same = false;
+  }
+  if(eview1->run() != eview2->run()) {
+    std::cout << "non-matching run number" << std::endl;
+    is_same = false;
+  }
+  if(eview1->event() != eview2->event()) {
+    std::cout << "non-matching event numbercode " << std::endl;
+    is_same = false;
+  }
+  if(eview1->lumi() != eview2->lumi()) {
+    std::cout << "non-matching lumi number" << std::endl;
+    is_same = false;
+  }
+  if(eview1->origDataSize() != eview2->origDataSize()) {
+    std::cout << "non-matching original data size" << std::endl;
+    is_same = false;
+  }
+  if(eview1->outModId() != eview2->outModId()) {
+    std::cout << "non-matching EVENT message code " << std::endl;
+    is_same = false;
+  }
+  if(eview1->hltCount() != eview2->hltCount()) {
+    std::cout << "non-matching EVENT message code " << std::endl;
+    is_same = false;
+  } else {
+    if (eview1->hltCount() > 0) {
+      std::vector<unsigned char> hlt_out1;
+      hlt_out1.resize(1 + (eview1->hltCount()-1)/4);
+      eview1->hltTriggerBits(&hlt_out1[0]);
+      std::vector<unsigned char> hlt_out2;
+      hlt_out2.resize(1 + (eview2->hltCount()-1)/4);
+      eview2->hltTriggerBits(&hlt_out2[0]);
+      //bool result = hlt_out1 == hlt_out2;
+      bool result = std::equal( hlt_out1.begin(), hlt_out1.end(), hlt_out2.begin() );
+      if(!result) {
+        std::cout << "non-matching HLT trigger bits" << std::endl;
+        is_same = false;
+      }
+    }
+  }
+  if(eview1->l1Count() != eview2->l1Count()) {
+    std::cout << "non-matching EVENT message code " << std::endl;
+    is_same = false;
+  } else {
+    std::vector<bool> l1_out1;
+    eview1->l1TriggerBits(l1_out1);
+    std::vector<bool> l1_out2;
+    eview2->l1TriggerBits(l1_out2);
+      bool result = l1_out1 == l1_out2;
+      //bool result = std::equal( hlt_out1.begin(), hlt_out1.end(), hlt_out2.begin() );
+      if(!result) {
+        std::cout << "non-matching L1 trigger bits" << std::endl;
+        is_same = false;
+      }
+  }
+  return is_same;
+}
+
+//==========================================================================
+unsigned int compEvtDataBlob(const EventMsgView* eview1, const EventMsgView* eview2) {
+  unsigned int bytes_diff(0);
+  if(eview1->eventLength() != eview2->eventLength()) {
+    std::cout << "non-matching EVENT message data length cannot continue" << std::endl;
+    if(eview1->eventLength() > eview2->eventLength())
+      return (eview1->eventLength() - eview2->eventLength());
+    else
+      return (eview2->eventLength() - eview1->eventLength());
+  }
+  if (eview1->eventLength() > 0) {
+    unsigned int size = eview1->eventLength();
+    uint8 *datablob1 = eview1->startAddress();
+    uint8 *datablob2 = eview2->startAddress();
+    for (unsigned i=0; i< size; i++) {
+       if(*(datablob1+i) != *(datablob2+i)) ++bytes_diff;
+    }
+  }
+  return bytes_diff;
+}
