@@ -77,30 +77,22 @@ namespace edm {
 
     SendDescs const& descs = header.descs();
 
-    SendDescs::const_iterator i(descs.begin()), e(descs.end());
-
     FDEBUG(6) << "mergeIntoRegistry: Product List: " << std::endl;
 
     if (subsequent) {
       ProductRegistry pReg;
-      for(; i != e; ++i) {
-	pReg.copyProduct(*i);
-	FDEBUG(6) << "StreamInput prod = " << i->className() << std::endl;
-      }
+      pReg.updateFromInput(descs);
       std::string mergeInfo = reg.merge(pReg, std::string(), BranchDescription::Permissive);
       if (!mergeInfo.empty()) {
         throw cms::Exception("MismatchedInput","RootInputFileSequence::previousEvent()") << mergeInfo;
       }
+      BranchIDListHelper::merge(header.branchIDLists(), std::string());
     } else {
       declareStreamers(descs);
       buildClassCache(descs);
       loadExtraClasses();
-      for(; i != e; ++i) {
-	i->setDefaultTransients();
-	i->init();
-	reg.copyProduct(*i);
-	FDEBUG(6) << "StreamInput prod = " << i->className() << std::endl;
-      }
+      reg.updateFromInput(descs);
+      BranchIDListRegistry::instance()->insertCollection(header.branchIDLists());
     }
   }
 
@@ -241,7 +233,6 @@ namespace edm {
      std::auto_ptr<SendJobHeader> sd = deserializeRegistry(initView);
      mergeIntoRegistry(*sd, productRegistryUpdate(), subsequent);
      ModuleDescriptionRegistry::instance()->insertCollection(sd->moduleDescriptionMap());
-     BranchIDListRegistry::instance()->insertCollection(sd->branchIDLists());
      SendJobHeader::ParameterSetMap const & psetMap = sd->processParameterSet();
      pset::Registry& psetRegistry = *pset::Registry::instance();
      for (SendJobHeader::ParameterSetMap::const_iterator i = psetMap.begin(), iEnd = psetMap.end(); i != iEnd; ++i) {
