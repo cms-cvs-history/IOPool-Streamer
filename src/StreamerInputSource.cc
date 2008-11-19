@@ -86,13 +86,15 @@ namespace edm {
       if (!mergeInfo.empty()) {
         throw cms::Exception("MismatchedInput","RootInputFileSequence::previousEvent()") << mergeInfo;
       }
-      BranchIDListHelper::merge(header.branchIDLists(), std::string());
+      BranchIDListHelper::updateFromInput(header.branchIDLists(), std::string());
+      BranchIDListHelper::updateFromInput(header.parameterSetIDLists(), std::string());
     } else {
       declareStreamers(descs);
       buildClassCache(descs);
       loadExtraClasses();
       reg.updateFromInput(descs);
-      BranchIDListRegistry::instance()->insertCollection(header.branchIDLists());
+      BranchIDListHelper::updateFromInput(header.branchIDLists(), std::string());
+      BranchIDListHelper::updateFromInput(header.parameterSetIDLists(), std::string());
     }
   }
 
@@ -289,12 +291,12 @@ namespace edm {
 
     setRefCoreStreamer(&productGetter_);
     std::auto_ptr<SendEvent> sd((SendEvent*)xbuf_.ReadObjectAny(tc_));
+    setRefCoreStreamer();
 
     if(sd.get()==0) {
         throw cms::Exception("StreamTranslation","Event deserialization error")
           << "got a null event from input stream\n";
     }
-    sd->processHistory().setDefaultTransients();
     ProcessHistoryRegistry::instance()->insertMapped(sd->processHistory());
 
     FDEBUG(5) << "Got event: " << sd->aux().id() << " " << sd->products().size() << std::endl;
@@ -342,7 +344,6 @@ namespace edm {
         boost::shared_ptr<ProductProvenance> eventEntryDesc(
 	     new ProductProvenance(spi->branchID(),
 				spi->status(),
-				spi->mod(),
 				*spi->parents()));
 
 	ep->branchMapperPtr()->insert(*eventEntryDesc);
