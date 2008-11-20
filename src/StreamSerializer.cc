@@ -7,10 +7,9 @@
 #include "IOPool/Streamer/interface/StreamSerializer.h"
 #include "DataFormats/Provenance/interface/BranchDescription.h"
 #include "DataFormats/Provenance/interface/BranchID.h"
-#include "DataFormats/Provenance/interface/EntryDescriptionRegistry.h"
-#include "DataFormats/Provenance/interface/EventEntryDescription.h"
+#include "DataFormats/Provenance/interface/ParentageRegistry.h"
+#include "DataFormats/Provenance/interface/Parentage.h"
 #include "DataFormats/Provenance/interface/ProductProvenance.h"
-#include "DataFormats/Provenance/interface/ModuleDescriptionRegistry.h"
 #include "DataFormats/Provenance/interface/BranchIDListRegistry.h"
 #include "DataFormats/Provenance/interface/ParameterSetIDListRegistry.h"
 #include "TClass.h"
@@ -63,7 +62,6 @@ namespace edm
                   << std::endl;
     }
     edm::Service<edm::ConstProductRegistry> reg;
-    sd.setModuleDescriptionMap(ModuleDescriptionRegistry::instance()->data());
     sd.setBranchIDLists(BranchIDListRegistry::instance()->data());
     sd.setParameterSetIDLists(ParameterSetIDListRegistry::instance()->data());
     SendJobHeader::ParameterSetMap psetMap;
@@ -139,7 +137,7 @@ namespace edm
                                        SerializeDataBuffer &data_buffer)
 
   {
-    EventEntryDescription entryDesc;
+    Parentage parentage;
     
 	
     History historyForOutput(eventPrincipal.history());
@@ -159,13 +157,12 @@ namespace edm
 	// Create and write the provenance.
         se.products().push_back(StreamedProduct(desc));
       } else {
-        bool found = EntryDescriptionRegistry::instance()->getMapped(oh.productProvenanceSharedPtr()->entryDescriptionID(), entryDesc);
+        bool found = ParentageRegistry::instance()->getMapped(oh.productProvenanceSharedPtr()->parentageID(), parentage);
 	assert (found);
         se.products().push_back(StreamedProduct(oh.wrapper(),
 					       desc,
-					       entryDesc.moduleDescriptionID(),
 					       oh.productProvenanceSharedPtr()->productStatus(),
-					       &entryDesc.parents()));
+					       &parentage.parents()));
       }
     }
 

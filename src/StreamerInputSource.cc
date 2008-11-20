@@ -8,9 +8,9 @@
 #include "FWCore/Framework/interface/EventPrincipal.h"
 #include "FWCore/Framework/interface/FileBlock.h"
 #include "DataFormats/Provenance/interface/BranchDescription.h"
-#include "DataFormats/Provenance/interface/EventEntryDescription.h"
+#include "DataFormats/Provenance/interface/Parentage.h"
 #include "DataFormats/Provenance/interface/ProductProvenance.h"
-#include "DataFormats/Provenance/interface/EntryDescriptionRegistry.h"
+#include "DataFormats/Provenance/interface/ParentageRegistry.h"
 #include "DataFormats/Provenance/interface/EventAuxiliary.h"
 #include "DataFormats/Provenance/interface/LuminosityBlockAuxiliary.h"
 #include "DataFormats/Provenance/interface/RunAuxiliary.h"
@@ -27,7 +27,6 @@
 #include "FWCore/ParameterSet/interface/Registry.h"
 #include "FWCore/Utilities/interface/ThreadSafeRegistry.h"
 
-#include "DataFormats/Provenance/interface/ModuleDescriptionRegistry.h"
 #include "DataFormats/Provenance/interface/BranchIDListRegistry.h"
 #include "DataFormats/Provenance/interface/ProductRegistry.h"
 #include "DataFormats/Provenance/interface/ProcessHistoryRegistry.h"
@@ -234,7 +233,6 @@ namespace edm {
   {
      std::auto_ptr<SendJobHeader> sd = deserializeRegistry(initView);
      mergeIntoRegistry(*sd, productRegistryUpdate(), subsequent);
-     ModuleDescriptionRegistry::instance()->insertCollection(sd->moduleDescriptionMap());
      SendJobHeader::ParameterSetMap const & psetMap = sd->processParameterSet();
      pset::Registry& psetRegistry = *pset::Registry::instance();
      for (SendJobHeader::ParameterSetMap::const_iterator i = psetMap.begin(), iEnd = psetMap.end(); i != iEnd; ++i) {
