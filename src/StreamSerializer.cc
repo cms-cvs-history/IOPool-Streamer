@@ -141,7 +141,7 @@ namespace edm
     
 	
     History historyForOutput(eventPrincipal.history());
-    historyForOutput.addEntry(selectorConfig);
+    historyForOutput.addEventSelectionEntry(selectorConfig);
     SendEvent se(eventPrincipal.aux(), eventPrincipal.processHistory(), historyForOutput);
 
     Selections::const_iterator i(selections_->begin()),ie(selections_->end());
