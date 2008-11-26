@@ -11,7 +11,6 @@
 #include "DataFormats/Provenance/interface/Parentage.h"
 #include "DataFormats/Provenance/interface/ProductProvenance.h"
 #include "DataFormats/Provenance/interface/BranchIDListRegistry.h"
-#include "DataFormats/Provenance/interface/ParameterSetIDListRegistry.h"
 #include "TClass.h"
 #include "IOPool/Streamer/interface/ClassFiller.h"
 #include "IOPool/Streamer/interface/InitMsgBuilder.h"
@@ -63,7 +62,6 @@ namespace edm
     }
     edm::Service<edm::ConstProductRegistry> reg;
     sd.setBranchIDLists(BranchIDListRegistry::instance()->data());
-    sd.setParameterSetIDLists(ParameterSetIDListRegistry::instance()->data());
     SendJobHeader::ParameterSetMap psetMap;
 
     pset::Registry const* psetRegistry = pset::Registry::instance();

@@ -86,14 +86,12 @@ namespace edm {
         throw cms::Exception("MismatchedInput","RootInputFileSequence::previousEvent()") << mergeInfo;
       }
       BranchIDListHelper::updateFromInput(header.branchIDLists(), std::string());
-      BranchIDListHelper::updateFromInput(header.parameterSetIDLists(), std::string());
     } else {
       declareStreamers(descs);
       buildClassCache(descs);
       loadExtraClasses();
       reg.updateFromInput(descs);
       BranchIDListHelper::updateFromInput(header.branchIDLists(), std::string());
-      BranchIDListHelper::updateFromInput(header.parameterSetIDLists(), std::string());
     }
   }
 
