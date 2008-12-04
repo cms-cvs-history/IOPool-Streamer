@@ -337,20 +337,20 @@ namespace edm {
 
 	ConstBranchDescription branchDesc(*spi->desc());
 	// This ProductProvenance constructor inserts into the entry description registry
-        boost::shared_ptr<ProductProvenance> eventEntryDesc(
+        boost::shared_ptr<ProductProvenance> productProvenance(
 	     new ProductProvenance(spi->branchID(),
 				spi->status(),
 				*spi->parents()));
 
-	ep->branchMapperPtr()->insert(*eventEntryDesc);
+	ep->branchMapperPtr()->insert(*productProvenance);
         if(spi->prod() != 0) {
           std::auto_ptr<EDProduct> aprod(const_cast<EDProduct*>(spi->prod()));
           FDEBUG(10) << "addgroup next " << spi->branchID() << std::endl;
-          ep->addGroup(aprod, branchDesc, eventEntryDesc);
+          ep->addGroup(aprod, branchDesc, productProvenance);
           FDEBUG(10) << "addgroup done" << std::endl;
         } else {
           FDEBUG(10) << "addgroup empty next " << spi->branchID() << std::endl;
-          ep->addGroup(branchDesc, eventEntryDesc);
+          ep->addGroup(branchDesc, productProvenance);
           FDEBUG(10) << "addgroup empty done" << std::endl;
         }
         spi->clear();
