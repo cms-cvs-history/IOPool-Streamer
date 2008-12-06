@@ -287,7 +287,7 @@ namespace edm {
 
     setRefCoreStreamer(&productGetter_);
     std::auto_ptr<SendEvent> sd((SendEvent*)xbuf_.ReadObjectAny(tc_));
-    resetRefCoreStreamer();
+    setRefCoreStreamer();
 
     if(sd.get()==0) {
         throw cms::Exception("StreamTranslation","Event deserialization error")
