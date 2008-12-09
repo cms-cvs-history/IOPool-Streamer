@@ -128,6 +128,7 @@ namespace edm {
     header->hltTriggerNames(paths);
     trigger_pset.addParameter<Strings>("@trigger_paths", paths);
     pset::Registry* psetRegistry = pset::Registry::instance();
+    trigger_pset.fillID();
     psetRegistry->insertMapped(trigger_pset);
   }
 
@@ -234,7 +235,9 @@ namespace edm {
      SendJobHeader::ParameterSetMap const & psetMap = sd->processParameterSet();
      pset::Registry& psetRegistry = *pset::Registry::instance();
      for (SendJobHeader::ParameterSetMap::const_iterator i = psetMap.begin(), iEnd = psetMap.end(); i != iEnd; ++i) {
-       psetRegistry.insertMapped(ParameterSet(i->second.pset_));
+       ParameterSet pset(i->second.pset_);
+       pset.fillID();
+       psetRegistry.insertMapped(pset);
      }
   }
 
