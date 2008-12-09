@@ -149,7 +149,7 @@ namespace edm
       BranchDescription const& desc = **i;
       BranchID const& id = desc.branchID();
 
-      OutputHandle<ProductProvenance> const oh = eventPrincipal.getForOutput<ProductProvenance>(id, true);
+      OutputHandle const oh = eventPrincipal.getForOutput(id, true);
       if (!oh.productProvenance()) {
 	// No product with this ID was put in the event.
 	// Create and write the provenance.
