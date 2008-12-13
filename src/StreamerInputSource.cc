@@ -122,14 +122,11 @@ namespace edm {
 
   void
   StreamerInputSource::saveTriggerNames(InitMsgView const* header) {
-
     ParameterSet trigger_pset;
     std::vector<std::string> paths;
     header->hltTriggerNames(paths);
     trigger_pset.addParameter<Strings>("@trigger_paths", paths);
-    pset::Registry* psetRegistry = pset::Registry::instance();
-    trigger_pset.fillID();
-    psetRegistry->insertMapped(trigger_pset);
+    trigger_pset.fillIDandInsert();
   }
 
   boost::shared_ptr<RunPrincipal>
