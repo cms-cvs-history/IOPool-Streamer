@@ -64,10 +64,7 @@ namespace edm
     sd.setBranchIDLists(BranchIDListRegistry::instance()->data());
     SendJobHeader::ParameterSetMap psetMap;
 
-    pset::Registry const* psetRegistry = pset::Registry::instance();
-    for (pset::Registry::const_iterator it = psetRegistry->begin(), itEnd = psetRegistry->end(); it != itEnd; ++it) {
-      psetMap.insert(std::make_pair(it->first, ParameterSetBlob(it->second.toStringOfTracked())));
-    }
+    pset::fillMap(pset::Registry::instance(), psetMap);
     sd.setParameterSetMap(psetMap);
 
     data_buffer.rootbuf_.Reset();
