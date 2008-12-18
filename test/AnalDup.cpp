@@ -19,8 +19,6 @@
 
       Code entry point, comment the function call that you don't want to make.
 
- $Id: AnalDup.cpp,v 1.1 2008/11/12 17:01:15 hcheung Exp $
-
 */
 
 #include <iostream>
