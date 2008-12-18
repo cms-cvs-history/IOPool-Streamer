@@ -19,8 +19,6 @@
 
       Code entry point, comment the function call that you don't want to make.
 
- $Id: DiagStreamerFile.cpp,v 1.1 2008/10/31 23:44:18 hcheung Exp $
-
 */
 
 #include <iostream>
