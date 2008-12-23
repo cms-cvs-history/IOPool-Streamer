@@ -335,6 +335,15 @@ namespace edm {
           adesc(const_cast<BranchDescription*>(spi->desc()));
 
         std::auto_ptr<Provenance> aprov(new Provenance(*(adesc.get()), *(aedesc.get()), spi->prod() != 0));
+        BranchDescription const& prod = aprov->product();
+        // This is a KLUDGE for 2_0_X only to fix incorrect product ID's for raw data.
+        if (prod.friendlyClassName() == std::string("FEDRawDataCollection") &&
+          prod.moduleLabel() == std::string("source")) {
+          ProductID &pid = const_cast<ProductID &>(prod.productID());
+          pid.id_ = 1U;
+          ProductID &pid2 = const_cast<ProductID &>(aprov->productID());
+          pid2.id_ = 1U;
+        }
         EntryDescriptionRegistry::instance()->insertMapped(aprov->event());
         if(spi->prod() != 0) {
           std::auto_ptr<EDProduct>
