@@ -1,4 +1,4 @@
-// $Id: StreamerFileWriter.cc,v 1.17.14.1 2009/03/24 21:21:46 biery Exp $
+// $Id: StreamerFileWriter.cc,v 1.17.16.1 2009/03/27 15:28:30 biery Exp $
 
 #include "IOPool/Streamer/src/StreamerFileWriter.h"
 
@@ -135,7 +135,7 @@ doOutputEventFragment(StreamerFileWriterEventParams const& evtParams)
                                          evtParams.dataPtr,
                                          evtParams.dataSize);
 
-    if (evtParams.fragmentIndex == (evtParams.fragmentCount - 1))
+    if (evtParams.fragmentIndex == 0)
     {
       index_writer_->writeEvent(evtParams.headerPtr, evtParams.headerSize,
                                 event_offset);
