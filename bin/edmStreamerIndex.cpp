@@ -91,8 +91,8 @@ int main(int argc, char* argv[]) {
    * and get the Init Message
    *
    */
-  StreamerInputIndexFile* const indexFile = new StreamerInputIndexFile(in);
-  const StartIndexRecord* const startindx = indexFile->startMessage();
+  StreamerInputIndexFile indexFile(in);
+  const StartIndexRecord* const startindx = indexFile.startMessage();
   const InitMsgView* const start = startindx->getInit();
 
   /*
@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
    *
    */
   unsigned int eventCount = 0;
-  for(indexRecIter it = indexFile->begin(), itEnd = indexFile->end(); it != itEnd; ++it) {
+  for(indexRecIter it = indexFile.begin(), itEnd = indexFile.end(); it != itEnd; ++it) {
     
     const EventMsgView* const iview = (*it)->getEventView();
 

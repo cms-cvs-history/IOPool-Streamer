@@ -21,6 +21,7 @@
 
 */
 
+#include <memory>
 #include <iostream>
 #include "zlib.h"
 #include "IOPool/Streamer/interface/MsgTools.h"
@@ -110,7 +111,7 @@ void readfile(std::string filename, std::string outfile) {
     std::cout<<"\n\n-------------EVENT Messages-------------------"<< std::endl;
 
     bool first_event(true);
-    EventMsgView* firstEvtView(0);
+    std::auto_ptr<EventMsgView> firstEvtView(0);
     const EventMsgView* eview(0);
     seenEventMap.clear();
   
@@ -131,23 +132,23 @@ void readfile(std::string filename, std::string outfile) {
         std::cout<<"----------dumping first EVENT-----------"<< std::endl;
         dumpEventView(eview);
         first_event = false;
-        std::vector<unsigned char> *savebuf(new std::vector<unsigned char>(0));
+        std::vector<unsigned char> savebuf(0);
         unsigned char* src = (unsigned char*)eview->startAddress();
         unsigned int srcSize = eview->size();
-        savebuf->resize(srcSize);
-        std::copy(src, src+srcSize, &(*savebuf)[0]);
-        firstEvtView = new EventMsgView(&(*savebuf)[0]);
-        //firstEvtView = new EventMsgView((void*)eview->startAddress());
-        if(!test_uncompress(firstEvtView, compress_buffer)) {
+        savebuf.resize(srcSize);
+        std::copy(src, src+srcSize, &(savebuf)[0]);
+        firstEvtView.reset(new EventMsgView(&(savebuf)[0]));
+        //firstEvtView,reset(new EventMsgView((void*)eview->startAddress()));
+        if(!test_uncompress(firstEvtView.get(), compress_buffer)) {
           std::cout << "uncompress error for count " << num_events 
                     << " event number " << firstEvtView->event() << std::endl;
           ++num_baduncompress;
           std::cout<<"----------dumping bad uncompress EVENT-----------"<< std::endl;
-          dumpEventView(firstEvtView);
+          dumpEventView(firstEvtView.get());
           good_event=false;
         }
       } else {
-        if(compares_bad(firstEvtView, eview)) {
+        if(compares_bad(firstEvtView.get(), eview)) {
           std::cout << "Bad event at count " << num_events << " dumping event " << std::endl
                     << "----------dumping bad EVENT-----------"<< std::endl;
           dumpEventView(eview);
@@ -181,7 +182,6 @@ void readfile(std::string filename, std::string outfile) {
         if(output) std::cout << "Wrote " << num_goodevents << " good events " << std::endl;
       }
     }
-    delete firstEvtView;
     std::cout << std::endl << "------------END--------------" << std::endl
               << "read " << num_events << " events" << std::endl
               << "and " << num_badevents << " events with bad headers" << std::endl
