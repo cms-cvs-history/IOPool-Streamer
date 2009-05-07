@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <stdint.h>
 #include "IOPool/Streamer/interface/StreamerFileIO.h"
 #include "boost/shared_array.hpp"
 
