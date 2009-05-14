@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <stdint.h>
+#include "FWCore/Utilities/interface/Adler32Calculator.h"
 #include "IOPool/Streamer/interface/StreamerFileIO.h"
 #include "boost/shared_array.hpp"
 
@@ -31,7 +32,7 @@ int main(int argc, char* argv[]){
      rsize += 1024*1024;
      //std::cout << file.tellg() << " " << rsize << " " << size << " - " << file.gcount() << std::endl;
      if(file.gcount()) 
-       OutputFile::adler32(ptr.get(), file.gcount(), a, b);
+       cms::Adler32(ptr.get(), file.gcount(), a, b);
      else 
        break;
    }
