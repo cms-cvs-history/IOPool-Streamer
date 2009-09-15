@@ -1,19 +1,30 @@
 <environment>
   <use name=boost>
-  <use name=DataFormats/TestObjects>
   <use name=FWCore/Framework>
-  <use name=IOPool/Streamer>
 
-  <bin file=EventMessageTest.cpp></bin>
-  <bin file=ReadStreamerFile.cpp></bin>
-  <bin file=DiagStreamerFile.cpp></bin>
-  <bin file=CalcAdler32.cpp></bin>
-  <bin file=WriteStreamerFile.cpp></bin>
-  <bin file=TestOtherMessage.cpp></bin>
-  <bin file=WriteDQMToFile.cpp></bin>
+  <bin file=EventMessageTest.cpp>
+    <use name=IOPool/Streamer>
+  </bin>
+  <bin file=ReadStreamerFile.cpp>
+    <use name=IOPool/Streamer>
+  </bin>
+  <bin file=DiagStreamerFile.cpp>
+    <use name=IOPool/Streamer>
+  </bin>
+  <bin file=CalcAdler32.cpp>
+  </bin>
+  <bin file=WriteStreamerFile.cpp>
+    <use name=IOPool/Streamer>
+  </bin>
+  <bin file=TestOtherMessage.cpp>
+  </bin>
+  <bin file=WriteDQMToFile.cpp>
+    <use name=IOPool/Streamer>
+  </bin>
 
   <bin file=EventBuffer_t.cpp>
-     <flags TEST_RUNNER_ARGS=" 10 10 100 ">
+    <flags TEST_RUNNER_ARGS=" 10 10 100 ">
+    <use name=IOPool/Streamer>
   </bin>
 
   <bin file=Eventmsg_t.cppunit.cpp>
@@ -22,6 +33,7 @@
  
   <bin file=RunFileReader_t.cpp>
 #     <flags TEST_RUNNER_ARGS=" data_1000.dat data_2000.dat data_3000.dat">
+    <use name=IOPool/Streamer>
   </bin>
 
   <bin file=RunThis_t.cpp>
@@ -29,11 +41,12 @@
   </bin>
 
   <library file="StreamThingProducer.cc" name=StreamThingProducer>
-   <flags EDM_PLUGIN=1>
+    <flags EDM_PLUGIN=1>
+    <use name=DataFormats/TestObjects>
   </library>
 
   <library file="StreamThingAnalyzer.cc" name=StreamThingAnalyzer>
-   <flags EDM_PLUGIN=1>
+    <flags EDM_PLUGIN=1>
   </library>
 
 </environment>
