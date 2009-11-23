@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <iosfwd>
-#include <iomanip>
+#include <iomanip> 
 #include <string>
 #include <vector>
 #include <map>
@@ -27,10 +27,10 @@ void convertTriggers(unsigned char c, std::vector<int> & results) {
    */
 
   for (int i = 0; i < 4; ++i) {
-    int const shift = 2*i;
-    int const bit1 = ((c >> (shift+1)) & 1);
-    int const bit2 = ((c >> shift) & 1);
-    int const trigVal = (2*bit1) + bit2;
+    const int shift = 2*i;
+    const int bit1 = ((c >> (shift+1)) & 1);
+    const int bit2 = ((c >> shift) & 1);
+    const int trigVal = (2*bit1) + bit2;
 
     results.push_back(trigVal);
   }
@@ -68,39 +68,39 @@ int main(int argc, char* argv[]) {
       return 1;
     }
 
-  notify(vm);
+  notify(vm);    
 
   if (vm.count("help")) {
     std::cerr << desc << "\n";
     return 1;
   }
-
+  
   if (!vm.count("in")) {
     std::cerr << "input not set.\n";
     return 1;
   }
-
+  
   /*
    * Input Streamer Index file and output XML file
    */
-  std::string in = vm["in"].as<std::string>();
+  std::string in = vm["in"].as<std::string>(); 
 
-
+  
   /*
    * First read in the streamer index file
    * and get the Init Message
    *
    */
-  edm::StreamerInputIndexFile indexFile(in);
-  StartIndexRecord const* const startindx = indexFile.startMessage();
-  InitMsgView const* const start = startindx->getInit();
+  StreamerInputIndexFile indexFile(in);
+  const StartIndexRecord* const startindx = indexFile.startMessage();
+  const InitMsgView* const start = startindx->getInit();
 
   /*
-   * Extract the list of trigger names and the number of trigger bit entries
+   * Extract the list of trigger names and the number of trigger bit entries 
    */
   std::vector<std::string> vhltnames;
   start->hltTriggerNames(vhltnames);
-  unsigned int const hltBitCount = start->get_hlt_bit_cnt();
+  const unsigned int hltBitCount = start->get_hlt_bit_cnt();
 
   std::map<std::string, std::vector<unsigned int> > eventsPerTrigger;
   std::map<std::string, std::vector<unsigned int> > errorsPerTrigger;
@@ -112,8 +112,8 @@ int main(int argc, char* argv[]) {
    */
   unsigned int eventCount = 0;
   for(indexRecIter it = indexFile.begin(), itEnd = indexFile.end(); it != itEnd; ++it) {
-
-    EventMsgView const* const iview = (*it)->getEventView();
+    
+    const EventMsgView* const iview = (*it)->getEventView();
 
     /*
      * Extract the trigger bits
@@ -127,7 +127,7 @@ int main(int argc, char* argv[]) {
      *
      */
     std::vector<int> triggerResults;
-    for (std::vector<unsigned char>::const_iterator it = hlt_out.begin(), itEnd = hlt_out.end(); it != itEnd; ++it) {
+    for ( std::vector<unsigned char>::const_iterator it = hlt_out.begin(), itEnd = hlt_out.end(); it != itEnd; ++it) {
       convertTriggers(*it, triggerResults);
     }
 
@@ -138,10 +138,10 @@ int main(int argc, char* argv[]) {
      */
     for (unsigned int i=0; i < hltBitCount; i++){
       std::string triggerName = vhltnames[i];
-      int const triggerBit = triggerResults[i];
-      if (triggerBit == 1)
+      const int triggerBit = triggerResults[i];
+      if ( triggerBit == 1) 
 	eventsPerTrigger[triggerName].push_back(eventCount);
-      if (triggerBit == 3)
+      if ( triggerBit == 3)
 	errorsPerTrigger[triggerName].push_back(eventCount);
     }
 
@@ -176,8 +176,8 @@ int main(int argc, char* argv[]) {
 //     std::cout << "," << eventCount << "," << errorCount;
 
     // how many integers do we need ?
-    unsigned int intCount = eventCount / (sizeof(unsigned int) * 8);
-    if ((eventCount % (sizeof(unsigned int)*8) ) != 0 )
+    unsigned int intCount = eventCount / (sizeof(unsigned int)*8);
+    if ( (eventCount % (sizeof(unsigned int)*8) ) != 0 )
       ++intCount;
 
     // prepare and initialize integers
@@ -186,7 +186,7 @@ int main(int argc, char* argv[]) {
 
     // fill integers, use their bits
     for (std::vector<unsigned int>::const_iterator it = events.begin(), itEnd = events.end(); it != itEnd; ++it) {
-      eventBitPattern[ *it / (sizeof(unsigned int) * 8) ] |= (1 << *it % (sizeof(unsigned int)*8) );
+      eventBitPattern[ *it / (sizeof(unsigned int)*8) ] |= ( 1 << *it % (sizeof(unsigned int)*8) );
     }
 
     // print integers
@@ -200,4 +200,4 @@ int main(int argc, char* argv[]) {
 
   return 0;
 }
-
+  
