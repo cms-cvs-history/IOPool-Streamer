@@ -34,12 +34,12 @@
 
 #include "FWCore/Utilities/interface/Exception.h"
 
-bool compares_bad(const EventMsgView* eview1, const EventMsgView* eview2);
-bool uncompressBuffer(unsigned char *inputBuffer,
+bool compares_bad(EventMsgView const* eview1, EventMsgView const* eview2);
+bool uncompressBuffer(unsigned char* inputBuffer,
                               unsigned int inputSize,
                               std::vector<unsigned char> &outputBuffer,
                               unsigned int expectedFullSize);
-bool test_uncompress(const EventMsgView* eview, std::vector<unsigned char> &dest);
+bool test_uncompress(EventMsgView const* eview, std::vector<unsigned char> &dest);
 void readfile(std::string filename, std::string outfile);
 void help();
 void updateHLTStats(std::vector<uint8> const& packedHlt, uint32 hltcount, std::vector<uint32> &hltStats);
@@ -90,12 +90,12 @@ void readfile(std::string filename, std::string outfile) {
   StreamerOutputFile stream_output(outfile);
   try{
     // ----------- init
-    StreamerInputFile stream_reader (filename);
+    edm::StreamerInputFile stream_reader (filename);
     //if(output) StreamerOutputFile stream_output(outfile);
 
     std::cout << "Trying to Read The Init message from Streamer File: " << std::endl
          << filename << std::endl;
-    const InitMsgView* init = stream_reader.startMessage();
+    InitMsgView const* init = stream_reader.startMessage();
     std::cout<<"\n\n-------------INIT Message---------------------"<< std::endl;
     std::cout<<"Dump the Init Message from Streamer:-"<< std::endl;
     dumpInitView(init);
@@ -112,7 +112,7 @@ void readfile(std::string filename, std::string outfile) {
 
     bool first_event(true);
     std::auto_ptr<EventMsgView> firstEvtView(0);
-    const EventMsgView* eview(0);
+    EventMsgView const* eview(0);
     seenEventMap.clear();
   
     while(stream_reader.next()) {
@@ -204,7 +204,7 @@ void readfile(std::string filename, std::string outfile) {
 }
 
 //==========================================================================
-bool compares_bad(const EventMsgView* eview1, const EventMsgView* eview2) {
+bool compares_bad(EventMsgView const* eview1, EventMsgView const* eview2) {
   bool is_bad(false);
   if(eview1->code() != eview2->code()) {
     std::cout << "non-matching EVENT message code " << std::endl;
@@ -238,7 +238,7 @@ bool compares_bad(const EventMsgView* eview1, const EventMsgView* eview2) {
 }
 
 //==========================================================================
-bool test_uncompress(const EventMsgView* eview, std::vector<unsigned char> &dest) {
+bool test_uncompress(EventMsgView const* eview, std::vector<unsigned char> &dest) {
   unsigned long origsize = eview->origDataSize();
   bool success = false;
   if(origsize != 0)
