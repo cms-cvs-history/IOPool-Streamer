@@ -112,6 +112,7 @@ void readfile(std::string filename, std::string outfile) {
 
     bool first_event(true);
     std::auto_ptr<EventMsgView> firstEvtView(0);
+    std::vector<unsigned char> savebuf(0);
     EventMsgView const* eview(0);
     seenEventMap.clear();
   
@@ -132,7 +133,6 @@ void readfile(std::string filename, std::string outfile) {
         std::cout<<"----------dumping first EVENT-----------"<< std::endl;
         dumpEventView(eview);
         first_event = false;
-        std::vector<unsigned char> savebuf(0);
         unsigned char* src = (unsigned char*)eview->startAddress();
         unsigned int srcSize = eview->size();
         savebuf.resize(srcSize);
@@ -175,7 +175,7 @@ void readfile(std::string filename, std::string outfile) {
         firstEvtView->hltTriggerBits(&packedHlt[0]);
         updateHLTStats(packedHlt, hltcount, hltStats);
       }
-      if((num_events % 1000) == 0) {
+      if((num_events % 50) == 0) {
         std::cout << "Read " << num_events << " events, and "
                   << num_badevents << " events with bad headers, and "
                   << num_baduncompress << " events with bad uncompress" << std::endl;
