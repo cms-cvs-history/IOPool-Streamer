@@ -29,6 +29,7 @@
 #include "IOPool/Streamer/interface/EventMessage.h"
 #include "IOPool/Streamer/interface/DumpTools.h"
 
+#include "FWCore/Utilities/interface/Adler32Calculator.h"
 #include "IOPool/Streamer/interface/StreamerInputFile.h"
 #include "IOPool/Streamer/interface/StreamerOutputFile.h"
 
@@ -39,6 +40,7 @@ bool uncompressBuffer(unsigned char* inputBuffer,
                               unsigned int inputSize,
                               std::vector<unsigned char> &outputBuffer,
                               unsigned int expectedFullSize);
+bool test_chksum(EventMsgView const* eview);
 bool test_uncompress(EventMsgView const* eview, std::vector<unsigned char> &dest);
 void readfile(std::string filename, std::string outfile);
 void help();
@@ -77,6 +79,7 @@ void readfile(std::string filename, std::string outfile) {
   int num_events(0);
   int num_badevents(0);
   int num_baduncompress(0);
+  int num_badchksum(0);
   int num_goodevents(0);
   int num_duplevents(0);
   uint32 hltcount(0);
@@ -139,6 +142,15 @@ void readfile(std::string filename, std::string outfile) {
         std::copy(src, src+srcSize, &(savebuf)[0]);
         firstEvtView.reset(new EventMsgView(&(savebuf)[0]));
         //firstEvtView,reset(new EventMsgView((void*)eview->startAddress()));
+        if(!test_chksum(firstEvtView.get())) {
+          std::cout << "checksum error for count " << num_events 
+                    << " event number " << eview->event() 
+                    << " from host name " << eview->hostName() << std::endl;
+          ++num_badchksum;
+          std::cout<<"----------dumping bad checksum EVENT-----------"<< std::endl;
+          dumpEventView(eview);
+          good_event=false;
+        }
         if(!test_uncompress(firstEvtView.get(), compress_buffer)) {
           std::cout << "uncompress error for count " << num_events 
                     << " event number " << firstEvtView->event() << std::endl;
@@ -153,6 +165,15 @@ void readfile(std::string filename, std::string outfile) {
                     << "----------dumping bad EVENT-----------"<< std::endl;
           dumpEventView(eview);
           ++num_badevents;
+          good_event=false;
+        }
+        if(!test_chksum(eview)) {
+          std::cout << "checksum error for count " << num_events 
+                    << " event number " << eview->event()
+                    << " from host name " << eview->hostName() << std::endl;
+          ++num_badchksum;
+          std::cout<<"----------dumping bad checksum EVENT-----------"<< std::endl;
+          dumpEventView(eview);
           good_event=false;
         }
         if(!test_uncompress(eview, compress_buffer)) {
@@ -178,6 +199,7 @@ void readfile(std::string filename, std::string outfile) {
       if((num_events % 50) == 0) {
         std::cout << "Read " << num_events << " events, and "
                   << num_badevents << " events with bad headers, and "
+                  << num_badchksum << " events with bad check sum, and " 
                   << num_baduncompress << " events with bad uncompress" << std::endl;
         if(output) std::cout << "Wrote " << num_goodevents << " good events " << std::endl;
       }
@@ -185,6 +207,7 @@ void readfile(std::string filename, std::string outfile) {
     std::cout << std::endl << "------------END--------------" << std::endl
               << "read " << num_events << " events" << std::endl
               << "and " << num_badevents << " events with bad headers" << std::endl
+              << "and " << num_badchksum << " events with bad check sum"  << std::endl
               << "and " << num_baduncompress << " events with bad uncompress" << std::endl
               << "and " << num_duplevents << " duplicated event Id" << std::endl;
     if(output) {
@@ -198,6 +221,7 @@ void readfile(std::string filename, std::string outfile) {
                << e.what() << std::endl
                << "After reading " << num_events << " events, and "
                << num_badevents << " events with bad headers" << std::endl
+               << "and " << num_badchksum << " events with bad check sum"  << std::endl
                << "and " << num_baduncompress << " events with bad uncompress"  << std::endl
                << "and " << num_duplevents << " duplicated event Id" << std::endl;
   }
@@ -238,10 +262,25 @@ bool compares_bad(EventMsgView const* eview1, EventMsgView const* eview2) {
 }
 
 //==========================================================================
+bool test_chksum(EventMsgView const* eview) {
+  uint32_t adler32_chksum = cms::Adler32((char*)eview->eventData(), eview->eventLength());
+  //std::cout << "Adler32 checksum of event = " << adler32_chksum << std::endl;
+  //std::cout << "Adler32 checksum from header = " << eview->adler32_chksum() << std::endl;
+  //std::cout << "event from host name = " << eview->hostName() << std::endl;
+  if((uint32)adler32_chksum != eview->adler32_chksum()) {
+    std::cout << "Bad chekcsum: Adler32 checksum of event data  = " << adler32_chksum
+              << " from header = " << eview->adler32_chksum()
+              << " host name = " << eview->hostName() << std::endl;
+    return false;
+  }
+  return true;
+}
+
+//==========================================================================
 bool test_uncompress(EventMsgView const* eview, std::vector<unsigned char> &dest) {
   unsigned long origsize = eview->origDataSize();
   bool success = false;
-  if(origsize != 0)
+  if(origsize != 0 && origsize != 78)
   {
     // compressed
     success = uncompressBuffer((unsigned char*)eview->eventData(),
@@ -260,8 +299,8 @@ bool uncompressBuffer(unsigned char *inputBuffer,
                               unsigned int expectedFullSize)
   {
     unsigned long origSize = expectedFullSize;
-    unsigned long uncompressedSize = expectedFullSize;
-    outputBuffer.resize(origSize);
+    unsigned long uncompressedSize = expectedFullSize*1.1;
+    outputBuffer.resize(uncompressedSize);
     int ret = uncompress(&outputBuffer[0], &uncompressedSize,
                          inputBuffer, inputSize);
     if(ret == Z_OK) {
