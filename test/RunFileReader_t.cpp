@@ -1,7 +1,5 @@
 /*----------------------------------------------------------------------
 
- $Id: RunFileReader_t.cpp,v 1.8 2007/04/10 14:03:40 chrjones Exp $
-
 ----------------------------------------------------------------------*/  
 
 #include <exception>
@@ -16,7 +14,6 @@
 #include "IOPool/Streamer/interface/HLTInfo.h"
 #include "IOPool/Streamer/interface/ClassFiller.h"
 
-#include "boost/shared_ptr.hpp"
 #include "boost/bind.hpp"
 
 #include "FWCore/PluginManager/interface/PluginManager.h"
