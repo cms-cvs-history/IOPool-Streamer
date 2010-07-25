@@ -15,6 +15,7 @@
 #include "IOPool/Streamer/interface/ClassFiller.h"
 
 #include "boost/bind.hpp"
+#include "boost/shared_ptr.hpp"
 
 #include "FWCore/PluginManager/interface/PluginManager.h"
 #include "FWCore/PluginManager/interface/standard.h"
